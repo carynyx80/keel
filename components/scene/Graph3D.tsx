@@ -244,10 +244,10 @@ function Vessel({ layout, reduced }: { layout: Layout; reduced: boolean }) {
 
   useEffect(() => {
     const col = conduitGeo.getAttribute("color") as THREE.BufferAttribute;
-    const dim = new THREE.Color("#1f7a68");
+    const dim = new THREE.Color("#3fd1ac");
     curves.forEach(({ e }, i) => {
       const on = !!active && (e.s.id === active || e.t.id === active);
-      const c = on ? SONAR.clone().multiplyScalar(1.8) : dim.clone().multiplyScalar(active ? 0.35 : 0.9);
+      const c = on ? SONAR.clone().multiplyScalar(2.2) : dim.clone().multiplyScalar(active ? 0.18 : 0.55);
       for (let k = 0; k < SEG; k++) {
         const fade = 0.55 + 0.45 * Math.sin((k / SEG) * Math.PI);
         col.setXYZ((i * SEG + k) * 2, c.r * fade, c.g * fade, c.b * fade);
@@ -335,7 +335,7 @@ function Vessel({ layout, reduced }: { layout: Layout; reduced: boolean }) {
   return (
     <group>
       <lineSegments geometry={conduitGeo}>
-        <lineBasicMaterial vertexColors transparent opacity={0.75} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} />
+        <lineBasicMaterial vertexColors transparent opacity={0.9} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} />
       </lineSegments>
       {!reduced && packetCount > 0 && (
         <points geometry={packetGeo}>
@@ -516,7 +516,7 @@ function Rig({ hull, reduced, idle, hasLayout }: { hull: Hull; reduced: boolean;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (free / Math.max(1, size.height)));
     const byWidth = (span * 1.05) / Math.tan(hfov / 2);
     const byHeight = (Math.max(hull.depth * 1.6, span * 0.55)) / Math.tan(vfov / 2);
-    return Math.max(byWidth, byHeight) * 0.8;
+    return Math.max(byWidth, byHeight) * (size.width < 768 ? 1.05 : 0.82);
   }, [size.width, size.height, panels, span, hull, camera]);
   useEffect(() => {
     const dir = new THREE.Vector3(0.62, 0.36, 0.7).normalize();

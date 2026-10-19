@@ -78,19 +78,19 @@ To force the 2D fallback renderer, open `/?render=2d`.
 
 Agents call OpenAI's Chat Completions API through the `openai` SDK (`lib/engine/llm.ts`), streaming, with strict JSON-schema structured outputs and `reasoning_effort` per agent role. The same file can run the agents on Claude instead when only `ANTHROPIC_API_KEY` is set.
 
-### The 3D stage
+### The simulation
 
-- Built with React Three Fiber and drei. Files are instanced icosahedrons sized by line count and colored by module. Dependencies are line segments. The layout is a 3D force simulation (`d3-force-3d`) that clusters modules on a sphere.
-- **Adaptive:**
-  - An empty session shows a slowly rotating keel wireframe.
-  - Ingest fills in the real graph.
-  - Agent reads and citations make nodes pulse.
-  - Hovering a node highlights its neighbors.
-  - Clicking a node moves the camera to it and opens an action card.
+Keel draws your codebase as a vessel seen from a submarine control room. Everything on screen is driven by real data and real agent activity.
+
+- **The hull is the repo.** Each module is a compartment along the keel, ordered bow to stern by dependency flow: modules that mostly import others (entry points, routes) sit forward, and foundations (libs, stores) sit aft. Files are contacts packed inside the hull's cross-section, sized by line count.
+- **Conduits are imports.** Every internal import is a glowing cable arching between two contacts, with data packets flowing along it. Hover a contact to light up its conduits; click it to steer the camera to it and open a contact card (inspect, impact-if-removed, port).
+- **The crew is visible.** When a station runs, each agent launches from the bridge as a drone. Readers (amber) fly to the exact file they are reading and hold a scan beam on it; the navigator and chart-maker (teal) hold station at the bridge. Drones return when their report is in. Reads fire amber pings, and citations fire teal ones.
+- **Ocean and instruments:** marine snow, a sonar sweep and range rings on the seabed grid, bloom and vignette, plus a HUD with a reticle, a bearing tape and live BRG/ELV/RNG readouts. The command bar shows telemetry (compartments, contacts, conduits, hull lines, crew out, model uplink, UTC), and a comms channel logs every agent transmission with its call sign.
 - **Degrades gracefully:**
-  - The 2D canvas renderer takes over when WebGL is missing, on low-power devices (≤ 2 cores or ≤ 2 GB device memory), with data saver on, or when the WebGL context is lost or crashes.
-  - `prefers-reduced-motion` stops the drift and the pulse animation.
-  - Graphs over 220 nodes are collapsed (level of detail).
+  - The 2D renderer is a matching side-elevation schematic with a scanning sonar line. It takes over when WebGL is missing, on low-power devices, with data saver on, or when the WebGL context is lost; `/?render=2d` forces it.
+  - `prefers-reduced-motion` stops the drift, packets, snow and pulse animation.
+  - Phones and four-core machines get a lighter effects pass.
+  - Repos over 220 files are collapsed into directory nodes.
 
 ## Known limits
 
