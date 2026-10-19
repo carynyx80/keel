@@ -123,7 +123,7 @@ export default function KeelApp() {
           </div>
           {hasKey === false && (
             <p className="mt-2 rounded-lg border border-[#ffb86b]/30 bg-hull-950/80 px-4 py-2 text-xs text-[#ffb86b]">
-              No <code>ANTHROPIC_API_KEY</code> on the server — ingest and the 3D map work; agent modules will report an error until the key is set.
+              No <code>OPENAI_API_KEY</code> on the server — ingest and the 3D map work; agent modules will report an error until the key is set.
             </p>
           )}
         </header>

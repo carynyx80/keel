@@ -6,7 +6,7 @@ import { runInterrogator } from "@/lib/modules/interrogator";
 import { runPorter } from "@/lib/modules/porter";
 import { runSpec } from "@/lib/modules/spec";
 import { runNarrator } from "@/lib/modules/narrator";
-import { hasApiKey } from "@/lib/engine/llm";
+import { hasApiKey, NO_KEY_MESSAGE } from "@/lib/engine/llm";
 
 export const runtime = "nodejs";
 // Multi-agent jobs take 1–4 minutes. Requires Vercel Fluid Compute (default for new projects).
@@ -20,7 +20,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ module: string
   return sseResponse(async (emit) => {
     if (!MODULES.includes(module as ModuleId)) throw new KeelError("NOT_FOUND", `Unknown module "${module}"`, 404);
     const source = parseSource(body);
-    if (!hasApiKey()) throw new KeelError("NO_API_KEY", "The server has no ANTHROPIC_API_KEY configured. Add it to .env.local (local) or the Vercel project's Environment Variables, then redeploy. Ingest and the 3D map still work without it.", 503);
+    if (!hasApiKey()) throw new KeelError("NO_API_KEY", NO_KEY_MESSAGE, 503);
     const { index, cached } = await getIndex(source, (m) => emit({ type: "progress", stage: "ingest", message: m }));
     if (!cached) {
       emit({ type: "summary", summary: index.summary });

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { hasApiKey, MODEL } from "@/lib/engine/llm";
+import { hasApiKey, MODEL, PROVIDER } from "@/lib/engine/llm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  return NextResponse.json({ ok: true, hasApiKey: hasApiKey(), model: MODEL });
+  return NextResponse.json({ ok: true, hasApiKey: hasApiKey(), provider: PROVIDER, model: MODEL });
 }

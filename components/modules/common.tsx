@@ -37,7 +37,7 @@ export function RunBar({ m, onRun, label, disabled, children }: { m: ModuleId; o
       </div>
       {!hasRepo && <p className="text-xs text-ink-faint">Load the demo repo, a public Git URL, or a zip first.</p>}
       {hasKey === false && !run.error && (
-        <ErrorBox code="NO_API_KEY" message="The server has no ANTHROPIC_API_KEY, so agents can't run. Ingest and the 3D map still work. Add the key in .env.local or the Vercel project's Environment Variables and redeploy." />
+        <ErrorBox code="NO_API_KEY" message="The server has no OPENAI_API_KEY, so agents can't run. Ingest and the 3D map still work. Add the key in .env.local or the Vercel project's Environment Variables and redeploy." />
       )}
       {run.error && <ErrorBox {...run.error} />}
     </div>

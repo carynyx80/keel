@@ -24,7 +24,7 @@ The **Demo repo** button loads `demo-repo/` (`harbor-api`), a small undocumented
 
 ```bash
 npm install
-cp .env.example .env.local   # then set ANTHROPIC_API_KEY
+cp .env.example .env.local   # then set OPENAI_API_KEY
 npm run dev                  # http://localhost:3000
 ```
 
@@ -32,8 +32,9 @@ Requires Node 20 or later. The one environment variable that matters:
 
 | Variable | Required | Notes |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | yes, for agent modules | Read only on the server and never sent to the browser. Without it, ingest and the 3D map still work, and the agent modules show a clear "no API key" error. |
-| `KEEL_MODEL` | no | Defaults to `claude-opus-5-5`. |
+| `OPENAI_API_KEY` | yes, for agent modules | Read only on the server and never sent to the browser. Without it, ingest and the 3D map still work, and the agent modules show a clear "no API key" error. |
+| `OPENAI_MODEL` | no | Defaults to `gpt-5.5`. Set it to any chat model your key can use that supports structured outputs. |
+| `ANTHROPIC_API_KEY` | no | Alternative provider. Used only when `OPENAI_API_KEY` is unset; the agents then run on Claude (`KEEL_MODEL`, default `claude-opus-5-5`). |
 
 To force the 2D fallback renderer, open `/?render=2d`.
 
@@ -75,7 +76,7 @@ To force the 2D fallback renderer, open `/?render=2d`.
 
    The 3D scene pulses the files that agents are reading (amber) and the files they cite (teal).
 
-Agents call the Claude Messages API through `@anthropic-ai/sdk`, streaming with `output_config.effort`. Server-side refusal fallback (`fallbacks: "default"`) is turned on. If an account rejects that beta, Keel switches it off and retries.
+Agents call OpenAI's Chat Completions API through the `openai` SDK (`lib/engine/llm.ts`), streaming, with strict JSON-schema structured outputs and `reasoning_effort` per agent role. The same file can run the agents on Claude instead when only `ANTHROPIC_API_KEY` is set.
 
 ### The 3D stage
 
@@ -104,7 +105,7 @@ These are the real limits. Where something can't run inside a Vercel function, K
 | Job duration | `maxDuration = 300` s per module run | Needs Vercel Fluid Compute, the default for new projects. Typical runs take 1–3 minutes. A job that gets cut off shows a "connection closed before the job finished" error. |
 | Private repos | not cloned | Upload them as a zip instead. |
 | Index cache | per warm instance | On a cold start, the client sends the repo source again and Keel re-indexes it, usually in under a second. Each zip run re-uploads the zip. |
-| Retrieval | sparse vectors (feature-hashed TF-IDF over code-aware tokens) | Anthropic has no embeddings endpoint, and this keeps Keel free of any external database. `VectorStore` is an interface (`lib/engine/vector.ts`), so a hosted embedding store can be dropped in later. |
+| Retrieval | sparse vectors (feature-hashed TF-IDF over code-aware tokens) | Keeps Keel free of any external database and of a second paid embeddings call per run. `VectorStore` is an interface (`lib/engine/vector.ts`), so a hosted embedding store can be dropped in later. |
 | Porter equivalence | **executed** only for JS/TS → TypeScript/JavaScript | Both the original and the port run in a constrained `node:vm` context: no `process`, no fs, network or Node built-ins, in-repo relative imports only, and a 1 s timeout per call. Outputs are compared structurally. |
 | Porter equivalence | **model-traced** for Python, Go and Rust targets, or non-JS sources | Those languages can't run inside a Vercel Node function. A verifier agent traces the port by hand against the original's *executed* outputs, and the report labels the result as an estimate. |
 | Porter file size | ≤ 600 lines per module | Keeps one run within the time limit. |
@@ -114,9 +115,9 @@ These are the real limits. Where something can't run inside a Vercel function, K
 ## Deploy to Vercel
 
 1. Push this folder to a Git repo, or deploy it directly with `npx vercel`.
-2. In the Vercel project, go to **Settings → Environment Variables** and add `ANTHROPIC_API_KEY` for Production (and Preview if you use it).
+2. In the Vercel project, go to **Settings → Environment Variables** and add `OPENAI_API_KEY` for Production (and Preview if you use it).
 3. Redeploy. The build command is `npm run build`, which bundles `demo-repo/` into `lib/demo/bundle.generated.ts` first.
-4. Check `/api/health`. It returns `{ "hasApiKey": true, "model": "…" }` once the key is set.
+4. Check `/api/health`. It returns `{ "hasApiKey": true, "provider": "openai", "model": "…" }` once the key is set.
 
 ## Project layout
 
