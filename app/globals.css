@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body { height: 100%; }
+body {
+  @apply bg-hull-950 font-sans text-ink antialiased;
+  background-image: radial-gradient(ellipse at 50% 35%, #0c1a24 0%, #04070b 70%);
+}
+
+@layer components {
+  .glass {
+    background: rgba(7, 13, 20, 0.66);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid rgba(125, 255, 226, 0.08);
+    box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+  .glass-strong {
+    background: rgba(7, 13, 20, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(125, 255, 226, 0.12);
+  }
+  .cite {
+    @apply inline-flex items-center rounded border border-sonar/30 bg-sonar/10 px-1.5 py-[1px] font-mono text-[10.5px] text-sonar transition hover:border-sonar hover:bg-sonar/20;
+  }
+  .cite-bad { @apply border-[#ffb86b]/40 bg-[#ffb86b]/10 text-[#ffb86b]; }
+}
+
+/* Rendered Markdown from agents */
+.prose-keel { @apply text-sm leading-relaxed text-ink/90; }
+.prose-keel h1 { @apply mb-2 mt-4 text-lg font-semibold text-ink; }
+.prose-keel h2 { @apply mb-2 mt-4 text-base font-semibold text-ink; }
+.prose-keel h3, .prose-keel h4 { @apply mb-1 mt-3 text-sm font-semibold text-ink; }
+.prose-keel p { @apply my-2; }
+.prose-keel ul { @apply my-2 list-disc pl-5; }
+.prose-keel ol { @apply my-2 list-decimal pl-5; }
+.prose-keel li { @apply my-0.5; }
+.prose-keel code { @apply rounded bg-white/5 px-1 py-0.5 font-mono text-[12px] text-sonar-glow; }
+.prose-keel pre { @apply my-2 overflow-auto rounded-lg bg-hull-950/70 p-3; }
+.prose-keel pre code { @apply bg-transparent p-0 text-ink/90; }
+.prose-keel a { @apply text-sonar underline underline-offset-2; }
+.prose-keel table { @apply my-2 w-full text-left text-xs; }
+.prose-keel th, .prose-keel td { @apply border-b border-white/5 py-1 pr-3; }
+.prose-keel blockquote { @apply border-l-2 border-sonar/40 pl-3 text-ink-dim; }
+.prose-keel strong { @apply text-ink; }
+
+.mermaid-box svg { max-width: 100%; height: auto; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(125, 255, 226, 0.12); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

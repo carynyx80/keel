@@ -1,0 +1,74 @@
+"use client";
+import { handleCommon, keel, postSSE } from "./store";
+import type { ModuleId, RepoSource } from "@/lib/engine/types";
+
+let ingestCtl: AbortController | null = null;
+const runCtl: Partial<Record<ModuleId, AbortController>> = {};
+
+export async function loadSource(source: RepoSource, label: string): Promise<boolean> {
+  ingestCtl?.abort();
+  Object.values(runCtl).forEach((c) => c?.abort());
+  ingestCtl = new AbortController();
+  keel.resetRuns();
+  keel.set({ source, sourceLabel: label, ingesting: true, ingestError: undefined, summary: null, graph: null, files: [], selected: null, viewer: null, progress: "Connecting…" });
+  let ok = false;
+  await postSSE("/api/ingest", { source }, (e) => {
+    handleCommon(e, "ingest");
+    if (e.type === "result") {
+      const d = e.data as { files: { path: string; lines: number; lang: string }[]; hasApiKey: boolean; model: string };
+      keel.set({ files: d.files, hasApiKey: d.hasApiKey, model: d.model });
+      ok = true;
+    }
+    if (e.type === "error") keel.set({ ingestError: { code: e.code, message: e.message } });
+  }, ingestCtl.signal);
+  keel.set({ ingesting: false, progress: ok ? "" : keel.get().progress });
+  return ok;
+}
+
+export async function runModule(m: ModuleId, params: Record<string, unknown> = {}) {
+  const { source } = keel.get();
+  if (!source) return;
+  runCtl[m]?.abort();
+  const ctl = (runCtl[m] = new AbortController());
+  keel.updateRun(m, { running: true, error: undefined, result: undefined, partials: {}, stream: "", findings: [], startedAt: Date.now(), finishedAt: undefined });
+  await postSSE(`/api/run/${m}`, { source, params }, (e) => {
+    handleCommon(e, m);
+    switch (e.type) {
+      case "finding":
+        keel.updateRun(m, (r) => ({ findings: [...r.findings, e.finding] }));
+        break;
+      case "delta":
+        keel.updateRun(m, (r) => ({ stream: r.stream + e.text }));
+        break;
+      case "partial":
+        keel.updateRun(m, (r) => ({ partials: { ...r.partials, [e.key]: [...(r.partials[e.key] ?? []), e.value] } }));
+        break;
+      case "result":
+        keel.updateRun(m, { result: e.data });
+        break;
+      case "error":
+        keel.updateRun(m, { error: { code: e.code, message: e.message } });
+        if (e.code === "NO_API_KEY") keel.set({ hasApiKey: false });
+        break;
+    }
+  }, ctl.signal);
+  keel.updateRun(m, { running: false, finishedAt: Date.now() });
+  keel.set({ progress: "" });
+}
+
+export function cancelModule(m: ModuleId) {
+  runCtl[m]?.abort();
+  keel.updateRun(m, { running: false, error: { code: "CANCELLED", message: "Cancelled." } });
+}
+
+export function openFile(path: string, line?: number, endLine?: number) {
+  keel.set({ viewer: { path, line, endLine }, selected: path });
+}
+
+export async function fetchFile(path: string) {
+  const { source } = keel.get();
+  const res = await fetch("/api/file", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ source, path }) });
+  const j = await res.json();
+  if (!res.ok) throw new Error(j.error || `HTTP ${res.status}`);
+  return j as { path: string; lang: string; content: string; imports: string[]; importedBy: string[] };
+}

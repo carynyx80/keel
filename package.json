@@ -1,0 +1,43 @@
+{
+  "name": "keel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/bundle-demo.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/bundle-demo.mjs",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "d3-force-3d": "^3.0.6",
+    "isomorphic-git": "^1.44.3",
+    "js-yaml": "^5.5.0",
+    "jszip": "^3.10.2",
+    "marked": "^18.1.1",
+    "mermaid": "^12.2.0",
+    "next": "^15.5.28",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "three": "^0.186.1",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.31",
+    "tailwindcss": "^3.4.19"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
