@@ -76,7 +76,7 @@ export default function Interrogator() {
           ))}
         </div>
       )}
-      <form className="sticky bottom-0" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
+      <form className="sticky bottom-0 -mx-1 border-t border-white/5 bg-hull-900/95 px-1 pb-1 pt-3 backdrop-blur" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
         <RunBar m="interrogator" label="Ask" onRun={() => ask(q)} disabled={!q.trim()}>
           <label htmlFor="ask" className="sr-only">Question</label>
           <input id="ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Where is auth enforced? What breaks if I delete X?" className="min-w-0 flex-1 rounded-md border border-white/10 bg-hull-950/60 px-3 py-1.5 text-sm text-ink placeholder:text-ink-faint focus:border-sonar/60 focus:outline-none" />
