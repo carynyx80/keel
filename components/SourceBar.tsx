@@ -17,9 +17,7 @@ export default function SourceBar() {
   const demo = async () => {
     setErr("");
     keel.set({ active: "cartograph" });
-    if (await loadSource({ kind: "demo" }, "harbor-api (demo)")) {
-      if (keel.get().hasApiKey) runModule("cartograph");
-    }
+    if ((await loadSource({ kind: "demo" }, "harbor-api (demo)")) && keel.get().hasApiKey) runModule("cartograph");
   };
   const clone = () => {
     setErr("");
@@ -39,31 +37,28 @@ export default function SourceBar() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="primary" onClick={demo} disabled={ingesting}>
-          {ingesting && label.includes("demo") ? <Spinner /> : "▶"} Demo repo
+          {ingesting && label.includes("demo") ? <Spinner /> : "▶"} Demo vessel
         </Button>
         <form className="order-last flex w-full min-w-0 items-center gap-2 sm:order-none sm:w-auto sm:flex-1" onSubmit={(e) => { e.preventDefault(); clone(); }}>
           <label className="sr-only" htmlFor="git-url">Public Git URL</label>
-          <input
-            id="git-url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/owner/repo  (#branch optional)"
-            className="min-w-0 flex-1 rounded-md border border-white/10 bg-hull-950/60 px-3 py-1.5 font-mono text-xs text-ink placeholder:text-ink-faint focus:border-sonar/60 focus:outline-none"
-          />
-          <Button type="submit" disabled={ingesting || !url}>Clone</Button>
+          <div className="relative min-w-0 flex-1">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-sonar/60">GIT›</span>
+            <input id="git-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://github.com/owner/repo  (#branch)" className="field w-full !pl-11" />
+          </div>
+          <Button type="submit" disabled={ingesting || !url}>Dive</Button>
         </form>
-        <Button onClick={() => fileInput.current?.click()} disabled={ingesting}>Upload .zip</Button>
+        <Button onClick={() => fileInput.current?.click()} disabled={ingesting}>↑ Zip</Button>
         <input ref={fileInput} type="file" accept=".zip,application/zip" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
       </div>
-      {err && <p className="text-xs text-alarm">{err}</p>}
+      {err && <p className="font-mono text-[11px] text-alarm">⚠ {err}</p>}
       {summary && (
-        <p className="font-mono text-[11px] text-ink-faint">
-          <span className="text-sonar">{summary.name}</span> · {summary.fileCount} files · {summary.totalLines.toLocaleString()} lines ·{" "}
-          {Object.entries(summary.languages).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l]) => l).join(", ")}
-          {summary.truncated && <span className="text-[#ffb86b]"> · truncated to fit serverless limits</span>}
+        <p className="truncate font-mono text-[10.5px] text-ink-faint">
+          <span className="text-sonar">◆ {summary.name}</span> · {summary.fileCount} files · {summary.totalLines.toLocaleString()} lines ·{" "}
+          {Object.entries(summary.languages).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l]) => l).join(" / ")}
+          {summary.truncated && <span className="text-amber"> · truncated to fit serverless limits</span>}
         </p>
       )}
     </div>

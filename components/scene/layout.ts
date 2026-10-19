@@ -69,9 +69,9 @@ export function computeLayout(graph: RepoGraph): Layout {
 /** Horizontal shift (px) that centres the graph in the gap between the desktop side panels. */
 export function stageOffsetX(w: number, panelsVisible: boolean) {
   if (!panelsVisible || w < 768) return 0;
-  const inner = Math.min(w - 32, 1600);
+  const inner = Math.min(w - 32, 1680);
   const left = (w - inner) / 2;
-  const sidebarRight = left + 240 + 12;
-  const panelLeft = left + inner - Math.min(560, w * 0.46) - 12;
+  const sidebarRight = left + 264 + 12;
+  const panelLeft = left + inner - Math.min(580, w * 0.44) - 12;
   return w / 2 - (sidebarRight + panelLeft) / 2;
 }

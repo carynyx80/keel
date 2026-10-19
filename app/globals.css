@@ -2,57 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  --line: rgba(110, 255, 214, 0.16);
+  --line-strong: rgba(110, 255, 214, 0.42);
+  --panel: rgba(4, 13, 20, 0.8);
+}
 html, body { height: 100%; }
 body {
-  @apply bg-hull-950 font-sans text-ink antialiased;
-  background-image: radial-gradient(ellipse at 50% 35%, #0c1a24 0%, #04070b 70%);
+  @apply bg-abyss font-sans text-ink antialiased;
+  background:
+    radial-gradient(120% 80% at 50% 10%, #08202a 0%, #03101a 45%, #02060a 100%);
 }
 
 @layer components {
-  .glass {
-    background: rgba(7, 13, 20, 0.66);
-    backdrop-filter: blur(14px) saturate(1.2);
-    -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    border: 1px solid rgba(125, 255, 226, 0.08);
-    box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  /* Instrument panel: thin frame, corner brackets, faint grid. */
+  .hud {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(53, 242, 194, 0.035), transparent 40%),
+      var(--panel);
+    backdrop-filter: blur(10px) saturate(1.15);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    border: 1px solid var(--line);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
   }
-  .glass-strong {
-    background: rgba(7, 13, 20, 0.92);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(125, 255, 226, 0.12);
+  .hud::before, .hud::after {
+    content: "";
+    position: absolute;
+    width: 12px; height: 12px;
+    pointer-events: none;
+    border-color: var(--line-strong);
   }
+  .hud::before { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+  .hud::after { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+  .hud-solid { --panel: rgba(4, 12, 18, 0.96); }
+
+  .hud-head {
+    @apply flex items-center justify-between gap-2 border-b px-3 py-2;
+    border-color: var(--line);
+    background: linear-gradient(90deg, rgba(53, 242, 194, 0.08), transparent 70%);
+  }
+  .hud-title { @apply font-hud text-[11px] font-semibold uppercase tracking-[0.22em] text-ink; }
+  .hud-code { @apply font-mono text-[10px] tracking-wider text-sonar/70; }
+  .label { @apply font-hud text-[10px] font-medium uppercase tracking-[0.2em] text-ink-faint; }
+
+  .lamp { @apply inline-block h-1.5 w-1.5 rounded-full; box-shadow: 0 0 8px currentColor; background: currentColor; }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-1.5 font-hud text-[12px] font-semibold uppercase tracking-[0.16em] transition focus:outline-none focus-visible:ring-1 focus-visible:ring-sonar disabled:cursor-not-allowed disabled:opacity-40;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+  .btn-primary { @apply bg-sonar text-abyss hover:bg-sonar-glow; box-shadow: 0 0 24px rgba(53, 242, 194, 0.35); }
+  .btn-ghost { @apply bg-sonar/[0.06] text-ink ring-1 ring-inset ring-sonar/25 hover:bg-sonar/15 hover:text-sonar-glow; }
+  .btn-danger { @apply bg-alarm/10 text-alarm ring-1 ring-inset ring-alarm/40 hover:bg-alarm/20; }
+
+  .field {
+    @apply border bg-abyss/70 px-3 py-1.5 font-mono text-xs text-ink placeholder:text-ink-faint focus:outline-none;
+    border-color: var(--line);
+  }
+  .field:focus { border-color: var(--line-strong); box-shadow: 0 0 0 1px rgba(53, 242, 194, 0.15), 0 0 18px rgba(53, 242, 194, 0.08); }
+
   .cite {
-    @apply inline-flex items-center rounded border border-sonar/30 bg-sonar/10 px-1.5 py-[1px] font-mono text-[10.5px] text-sonar transition hover:border-sonar hover:bg-sonar/20;
+    @apply inline-flex items-center gap-1 border border-sonar/30 bg-sonar/[0.07] px-1.5 py-[1px] font-mono text-[10.5px] text-sonar transition hover:border-sonar hover:bg-sonar/20;
   }
-  .cite-bad { @apply border-[#ffb86b]/40 bg-[#ffb86b]/10 text-[#ffb86b]; }
+  .cite::before { content: "◇"; font-size: 8px; opacity: 0.7; }
+  .cite-bad { @apply border-amber/40 bg-amber/10 text-amber; }
+
+  .readout { @apply font-mono tabular-nums text-ink; }
+  .tick-bg {
+    background-image: repeating-linear-gradient(90deg, rgba(110, 255, 214, 0.25) 0 1px, transparent 1px 10px);
+  }
 }
 
 /* Rendered Markdown from agents */
-.prose-keel { @apply text-sm leading-relaxed text-ink/90; }
-.prose-keel h1 { @apply mb-2 mt-4 text-lg font-semibold text-ink; }
-.prose-keel h2 { @apply mb-2 mt-4 text-base font-semibold text-ink; }
-.prose-keel h3, .prose-keel h4 { @apply mb-1 mt-3 text-sm font-semibold text-ink; }
+.prose-keel { @apply text-[13.5px] leading-relaxed text-ink/90; }
+.prose-keel h1 { @apply mb-2 mt-5 font-hud text-base font-semibold uppercase tracking-[0.12em] text-sonar-glow; }
+.prose-keel h2 { @apply mb-2 mt-5 font-hud text-[13px] font-semibold uppercase tracking-[0.14em] text-sonar; }
+.prose-keel h3, .prose-keel h4 { @apply mb-1 mt-3 font-hud text-xs font-semibold uppercase tracking-[0.12em] text-ink; }
 .prose-keel p { @apply my-2; }
-.prose-keel ul { @apply my-2 list-disc pl-5; }
-.prose-keel ol { @apply my-2 list-decimal pl-5; }
-.prose-keel li { @apply my-0.5; }
-.prose-keel code { @apply rounded bg-white/5 px-1 py-0.5 font-mono text-[12px] text-sonar-glow; }
-.prose-keel pre { @apply my-2 overflow-auto rounded-lg bg-hull-950/70 p-3; }
+.prose-keel ul { @apply my-2 list-none pl-0; }
+.prose-keel ul > li { @apply relative pl-4; }
+.prose-keel ul > li::before { content: "›"; @apply absolute left-0 text-sonar; }
+.prose-keel ol { @apply my-2 list-decimal pl-5 marker:text-sonar; }
+.prose-keel li { @apply my-1; }
+.prose-keel code { @apply bg-sonar/[0.07] px-1 py-0.5 font-mono text-[12px] text-sonar-glow; }
+.prose-keel pre { @apply my-2 overflow-auto border p-3; border-color: var(--line); background: rgba(2, 6, 10, 0.7); }
 .prose-keel pre code { @apply bg-transparent p-0 text-ink/90; }
 .prose-keel a { @apply text-sonar underline underline-offset-2; }
 .prose-keel table { @apply my-2 w-full text-left text-xs; }
-.prose-keel th, .prose-keel td { @apply border-b border-white/5 py-1 pr-3; }
+.prose-keel th { @apply font-hud uppercase tracking-wider text-ink-dim; }
+.prose-keel th, .prose-keel td { @apply border-b py-1 pr-3; border-color: var(--line); }
 .prose-keel blockquote { @apply border-l-2 border-sonar/40 pl-3 text-ink-dim; }
-.prose-keel strong { @apply text-ink; }
+.prose-keel strong { @apply font-semibold text-ink; }
 
 .mermaid-box svg { max-width: 100%; height: auto; }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: rgba(125, 255, 226, 0.12); border-radius: 8px; }
+/* Scanline + grain over the whole viewport (very subtle). */
+.crt::after {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 60;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(110, 255, 214, 0.18); }
 ::-webkit-scrollbar-track { background: transparent; }
+::selection { background: rgba(53, 242, 194, 0.3); }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

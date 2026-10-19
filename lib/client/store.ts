@@ -1,6 +1,7 @@
 "use client";
 import { useSyncExternalStore } from "react";
 import type { Finding, KeelEvent, ModuleId, RepoGraph, RepoSource, RepoSummary } from "@/lib/engine/types";
+import { clearDrones, launchDrone, recallDrone } from "./scope";
 
 export interface AgentEntry { id: string; role: string; status: "start" | "done" | "error"; label: string; detail?: string; t: number; module: string }
 export interface ModuleRun { running: boolean; error?: { code: string; message: string }; result?: unknown; partials: Record<string, unknown[]>; stream: string; findings: Finding[]; startedAt?: number; finishedAt?: number }
@@ -70,6 +71,7 @@ export const keel = {
     keel.set((s) => ({ runs: { ...s.runs, [m]: { ...s.runs[m], ...(typeof patch === "function" ? patch(s.runs[m]) : patch) } } }));
   },
   resetRuns() {
+    clearDrones();
     keel.set({ runs: { cartograph: emptyRun(), interrogator: emptyRun(), porter: emptyRun(), spec: emptyRun(), narrator: emptyRun() }, log: [] });
   },
 };
@@ -131,6 +133,9 @@ export function logAgent(module: string, e: Extract<KeelEvent, { type: "agent" }
     return { log: log.slice(-200) };
   });
   if (e.paths?.length) pulse(e.paths, "read");
+  const key = `${module}:${e.id}`;
+  if (e.status === "start") launchDrone(key, e.role, e.role === "planner" || e.role === "synthesizer" ? null : e.paths?.[0] ?? null);
+  else recallDrone(key);
 }
 
 export function handleCommon(e: KeelEvent, module: string) {
