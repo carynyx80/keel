@@ -49,8 +49,8 @@ export function FindingsFeed({ m, collapsed = false }: { m: ModuleId; collapsed?
   const [open, setOpen] = useState(!collapsed);
   if (!run.findings.length) return run.running ? <p className="flex items-center gap-2 text-xs text-ink-faint"><Spinner /> Planner is choosing slices; reader findings will stream in here…</p> : null;
   return (
-    <div className="rounded-lg border border-white/5 bg-hull-950/30">
-      <button className="flex w-full items-center justify-between px-3 py-2 text-left font-mono text-[11px] uppercase tracking-wider text-ink-dim" onClick={() => setOpen(!open)}>
+    <div className="border border-sonar/10 bg-abyss/40">
+      <button className="flex w-full items-center justify-between px-3 py-2 text-left label !text-ink-dim" onClick={() => setOpen(!open)}>
         Reader findings ({run.findings.length}) <span>{open ? "−" : "+"}</span>
       </button>
       {open && (

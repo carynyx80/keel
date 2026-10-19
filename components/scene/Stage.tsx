@@ -62,8 +62,8 @@ export default function Stage() {
 
 function StageBadge({ mode, reason, canTry3d }: { mode: "3d" | "2d"; reason?: string; canTry3d: boolean }) {
   return (
-    <div className="pointer-events-auto fixed bottom-3 right-3 z-30 hidden items-center gap-2 rounded-md px-2 py-1 font-mono text-[10px] text-ink-faint md:flex glass">
-      <span className={mode === "3d" ? "text-sonar" : "text-ink-dim"}>{mode.toUpperCase()}</span>
+    <div className="pointer-events-auto fixed top-[182px] right-1/2 z-30 hidden translate-x-[calc(50%-var(--stage-dx,0px))] items-center gap-2 border border-sonar/15 bg-abyss/80 px-2 py-1 font-mono text-[10px] text-ink-faint md:flex">
+      <span className={mode === "3d" ? "text-sonar" : "text-ink-dim"}>RENDER {mode.toUpperCase()}</span>
       {reason && <span className="max-w-[260px] truncate" title={reason}>{reason}</span>}
       {canTry3d && (
         <button className="underline-offset-2 hover:text-ink hover:underline" onClick={() => keel.set({ renderMode: mode === "3d" ? "2d" : "3d" })}>

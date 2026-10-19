@@ -11,13 +11,13 @@ function load() {
       themeVariables: {
         darkMode: true,
         background: "transparent",
-        primaryColor: "#13212e",
-        primaryBorderColor: "#2cf5c8",
-        primaryTextColor: "#e6f1f5",
-        lineColor: "#5d7380",
-        secondaryColor: "#0c1620",
-        tertiaryColor: "#070d14",
-        fontFamily: "ui-monospace, monospace",
+        primaryColor: "#0a1824",
+        primaryBorderColor: "#35f2c2",
+        primaryTextColor: "#d7f2ea",
+        lineColor: "#2b8f78",
+        secondaryColor: "#061019",
+        tertiaryColor: "#03080d",
+        fontFamily: "IBM Plex Mono, ui-monospace, monospace",
         fontSize: "12px",
       },
     });
@@ -41,10 +41,10 @@ export default function Mermaid({ code }: { code: string }) {
   }, [code, id]);
   if (err)
     return (
-      <div className="rounded border border-alarm/30 bg-alarm/5 p-3 text-xs">
+      <div className="border border-alarm/30 bg-alarm/5 p-3 text-xs">
         <p className="mb-2 text-alarm">Diagram didn&apos;t parse — showing the Mermaid source instead.</p>
         <pre className="overflow-auto text-ink-dim">{code}</pre>
       </div>
     );
-  return <div className="mermaid-box overflow-auto" dangerouslySetInnerHTML={{ __html: svg || '<p class="text-ink-faint text-xs">Rendering diagram…</p>' }} />;
+  return <div className="mermaid-box overflow-auto border border-sonar/10 bg-abyss/40 p-3" dangerouslySetInnerHTML={{ __html: svg || '<p class="text-ink-faint text-xs">Rendering diagram…</p>' }} />;
 }

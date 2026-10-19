@@ -1,5 +1,6 @@
 "use client";
 import { handleCommon, keel, postSSE } from "./store";
+import { drones, recallDrone } from "./scope";
 import type { ModuleId, RepoSource } from "@/lib/engine/types";
 
 let ingestCtl: AbortController | null = null;
@@ -54,11 +55,13 @@ export async function runModule(m: ModuleId, params: Record<string, unknown> = {
   }, ctl.signal);
   keel.updateRun(m, { running: false, finishedAt: Date.now() });
   keel.set({ progress: "" });
+  for (const id of drones.keys()) if (id.startsWith(m + ":")) recallDrone(id);
 }
 
 export function cancelModule(m: ModuleId) {
   runCtl[m]?.abort();
-  keel.updateRun(m, { running: false, error: { code: "CANCELLED", message: "Cancelled." } });
+  for (const id of drones.keys()) if (id.startsWith(m + ":")) recallDrone(id);
+  keel.updateRun(m, { running: false, error: { code: "CANCELLED", message: "Recalled by the bridge." } });
 }
 
 export function openFile(path: string, line?: number, endLine?: number) {

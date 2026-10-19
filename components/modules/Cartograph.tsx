@@ -16,7 +16,7 @@ export default function Cartograph() {
       <RunBar m="cartograph" label="Map architecture" onRun={() => runModule("cartograph")} />
       {computed && !r && (
         <div>
-          <h4 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-dim">Computed module graph (from imports)</h4>
+          <h4 className="mb-2 label !text-ink-dim">Computed module graph (from imports)</h4>
           <Mermaid code={computed.computedMermaid} />
         </div>
       )}
@@ -32,7 +32,7 @@ export default function Cartograph() {
                 </p>
                 <div className="space-y-2">
                   {r.modules.map((m) => (
-                    <div key={m.name} className="rounded-lg border border-white/5 bg-hull-950/30 p-3">
+                    <div key={m.name} className="border border-sonar/10 bg-abyss/40 p-3">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <span className="font-mono text-sm text-sonar">{m.name}</span>
                         {m.dependsOn.length > 0 && <span className="font-mono text-[10px] text-ink-faint">→ {m.dependsOn.join(", ")}</span>}
@@ -49,11 +49,11 @@ export default function Cartograph() {
             ) : t === 1 ? (
               <div className="space-y-5">
                 <div>
-                  <div className="mb-2 flex items-center justify-between"><h4 className="font-mono text-[11px] uppercase tracking-wider text-ink-dim">Runtime architecture (agent-recovered)</h4><CopyButton text={r.architectureMermaid} label="Copy Mermaid" /></div>
+                  <div className="mb-2 flex items-center justify-between"><h4 className="label !text-ink-dim">Runtime architecture (agent-recovered)</h4><CopyButton text={r.architectureMermaid} label="Copy Mermaid" /></div>
                   <Mermaid code={r.architectureMermaid} />
                 </div>
                 <div>
-                  <div className="mb-2 flex items-center justify-between"><h4 className="font-mono text-[11px] uppercase tracking-wider text-ink-dim">Module dependencies (computed from imports)</h4><CopyButton text={r.computedMermaid} label="Copy Mermaid" /></div>
+                  <div className="mb-2 flex items-center justify-between"><h4 className="label !text-ink-dim">Module dependencies (computed from imports)</h4><CopyButton text={r.computedMermaid} label="Copy Mermaid" /></div>
                   <Mermaid code={r.computedMermaid} />
                 </div>
                 <p className="text-xs text-ink-faint">The 3D stage is the file-level version of this graph — click any node to inspect it.</p>

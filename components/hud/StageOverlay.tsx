@@ -17,7 +17,9 @@ export default function StageOverlay() {
     let raf = 0;
     const loop = () => {
       const w = window.innerWidth;
-      if (wrap.current) wrap.current.style.transform = `translateX(${-stageOffsetX(w, hasRepo)}px)`;
+      const dx = stageOffsetX(w, hasRepo);
+      if (wrap.current) wrap.current.style.transform = `translateX(${-dx}px)`;
+      document.documentElement.style.setProperty("--stage-dx", `${dx}px`);
       if (tape.current) tape.current.style.transform = `translateX(${180 - (scope.bearing + 360) * 4}px)`;
       if (brg.current) brg.current.textContent = String(Math.round(scope.bearing)).padStart(3, "0");
       if (rng.current) rng.current.textContent = scope.range.toFixed(0);

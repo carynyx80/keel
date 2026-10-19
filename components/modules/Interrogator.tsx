@@ -42,26 +42,26 @@ export default function Interrogator() {
       <div className="space-y-4">
         {history.map((h, i) => (
           <div key={i} className="space-y-2">
-            <div className="ml-auto w-fit max-w-[90%] rounded-lg bg-sonar/10 px-3 py-2 text-sm text-ink">{h.question}</div>
-            <div className="rounded-lg border border-white/5 bg-hull-950/40 p-3">
+            <div className="ml-auto w-fit max-w-[90%] border border-sonar/30 bg-sonar/10 px-3 py-2 text-sm text-ink">{h.question}</div>
+            <div className="border border-sonar/10 bg-abyss/50 p-3">
               <Markdown text={h.answer} />
               {h.citations.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5 border-t border-white/5 pt-2">
+                <div className="mt-3 flex flex-wrap gap-1.5 border-t border-sonar/10 pt-2">
                   {h.citations.filter((c, j, a) => a.findIndex((x) => x.path === c.path && x.line === c.line) === j).map((c, j) => (
                     <CiteChip key={j} {...c} onClick={() => openFile(c.path, c.line, c.endLine)} />
                   ))}
                 </div>
               )}
-              {h.invalidCitations > 0 && <p className="mt-2 text-[11px] text-[#ffb86b]">{h.invalidCitations} citation(s) pointed outside the file and are flagged.</p>}
+              {h.invalidCitations > 0 && <p className="mt-2 text-[11px] text-amber">{h.invalidCitations} citation(s) pointed outside the file and are flagged.</p>}
             </div>
           </div>
         ))}
         {run.running && (
           <div className="space-y-2">
-            <div className="ml-auto w-fit max-w-[90%] rounded-lg bg-sonar/10 px-3 py-2 text-sm text-ink">{pending.current}</div>
+            <div className="ml-auto w-fit max-w-[90%] border border-sonar/30 bg-sonar/10 px-3 py-2 text-sm text-ink">{pending.current}</div>
             <FindingsFeed m="interrogator" collapsed />
             {run.stream ? (
-              <div className="rounded-lg border border-white/5 bg-hull-950/40 p-3"><Markdown text={run.stream} /></div>
+              <div className="border border-sonar/10 bg-abyss/50 p-3"><Markdown text={run.stream} /></div>
             ) : run.findings.length > 0 ? (
               <p className="flex items-center gap-2 text-xs text-ink-faint"><Spinner /> Synthesizer is writing…</p>
             ) : null}
@@ -72,14 +72,14 @@ export default function Interrogator() {
       {history.length === 0 && !run.running && (
         <div className="flex flex-wrap gap-1.5">
           {SUGGEST.map((s) => (
-            <button key={s} onClick={() => ask(s)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-ink-dim hover:border-sonar/50 hover:text-sonar">{s}</button>
+            <button key={s} onClick={() => ask(s)} className="border border-sonar/20 bg-sonar/[0.04] px-3 py-1 font-mono text-[11px] text-ink-dim transition hover:border-sonar/60 hover:text-sonar">{s}</button>
           ))}
         </div>
       )}
-      <form className="sticky bottom-0 -mx-1 border-t border-white/5 bg-hull-900/95 px-1 pb-1 pt-3 backdrop-blur" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
+      <form className="sticky bottom-0 -mx-1 border-t border-sonar/10 bg-abyss/95 px-1 pb-1 pt-3 backdrop-blur" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
         <RunBar m="interrogator" label="Ask" onRun={() => ask(q)} disabled={!q.trim()}>
           <label htmlFor="ask" className="sr-only">Question</label>
-          <input id="ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Where is auth enforced? What breaks if I delete X?" className="min-w-0 flex-1 rounded-md border border-white/10 bg-hull-950/60 px-3 py-1.5 text-sm text-ink placeholder:text-ink-faint focus:border-sonar/60 focus:outline-none" />
+          <input id="ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Where is auth enforced? What breaks if I delete X?" className="min-w-0 flex-1 field !font-sans !text-sm" />
         </RunBar>
       </form>
     </div>
