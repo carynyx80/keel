@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   openGraph: { siteName: "Keelcode", type: "website" },
   twitter: { card: "summary_large_image" },
   description: "Dive into a codebase. A crew of AI agents maps its hull, answers with citations, ports modules, recovers specs and charts onboarding tours.",
+  other: { "ory-verify": "orynth-cbb7d6af7361489f85001ad84d084ff2" },
 };
 export const viewport: Viewport = { themeColor: "#02060a", width: "device-width", initialScale: 1 };
 
