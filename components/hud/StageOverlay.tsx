@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { scope } from "@/lib/client/scope";
-import { useKeel } from "@/lib/client/store";
+import { useKeelcode } from "@/lib/client/store";
 import { stageOffsetX } from "../scene/layout";
 
 /** Reticle, bearing tape and depth gauge drawn over the 3D stage. Reads camera telemetry via rAF. */
 export default function StageOverlay() {
-  const hasRepo = useKeel((s) => !!s.summary);
+  const hasRepo = useKeelcode((s) => !!s.summary);
   const tape = useRef<HTMLDivElement>(null);
   const brg = useRef<HTMLSpanElement>(null);
   const rng = useRef<HTMLSpanElement>(null);

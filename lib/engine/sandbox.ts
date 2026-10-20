@@ -54,8 +54,8 @@ export class Sandbox {
     const wrapper = vm.runInContext(`(function (exports, require, module, __filename, __dirname) {${code}\n})`, this.ctx, { filename: file, timeout: TIMEOUT_MS });
     const req = (spec: string) => this.load(this.resolve(file, spec.replace(/^node:/, "")));
     const run = () => wrapper(mod.exports, req, mod, file, path.dirname(file));
-    (this.ctx as Record<string, unknown>).__keelRun = run;
-    vm.runInContext("__keelRun()", this.ctx, { timeout: TIMEOUT_MS });
+    (this.ctx as Record<string, unknown>).__keelcodeRun = run;
+    vm.runInContext("__keelcodeRun()", this.ctx, { timeout: TIMEOUT_MS });
     return mod.exports;
   }
 
@@ -65,9 +65,9 @@ export class Sandbox {
       const target = fn.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], exp) ?? (fn === "default" ? exp : undefined);
       if (typeof target !== "function") return { ok: false, error: `export "${fn}" is not a function` };
       const g = this.ctx as Record<string, unknown>;
-      g.__keelFn = target;
-      g.__keelArgs = structuredClone(args);
-      let value = vm.runInContext("__keelFn(...__keelArgs)", this.ctx, { timeout: TIMEOUT_MS });
+      g.__keelcodeFn = target;
+      g.__keelcodeArgs = structuredClone(args);
+      let value = vm.runInContext("__keelcodeFn(...__keelcodeArgs)", this.ctx, { timeout: TIMEOUT_MS });
       if (value && typeof (value as Promise<unknown>).then === "function") {
         value = await Promise.race([value, new Promise((_, rej) => setTimeout(() => rej(new Error("timed out")), TIMEOUT_MS))]);
       }

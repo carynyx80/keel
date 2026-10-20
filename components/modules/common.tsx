@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
-import { useKeel, type ModuleRun } from "@/lib/client/store";
+import { useKeelcode, type ModuleRun } from "@/lib/client/store";
 import { cancelModule, openFile } from "@/lib/client/actions";
 import type { ModuleId } from "@/lib/engine/types";
 import { Button, CiteChip, ErrorBox, Spinner } from "../ui/bits";
 
 export function useRun(m: ModuleId): ModuleRun {
-  return useKeel((s) => s.runs[m]);
+  return useKeelcode((s) => s.runs[m]);
 }
 
 function Elapsed({ from, to }: { from?: number; to?: number }) {
@@ -22,8 +22,8 @@ function Elapsed({ from, to }: { from?: number; to?: number }) {
 
 export function RunBar({ m, onRun, label, disabled, children }: { m: ModuleId; onRun: () => void; label: string; disabled?: boolean; children?: ReactNode }) {
   const run = useRun(m);
-  const hasKey = useKeel((s) => s.hasApiKey);
-  const hasRepo = useKeel((s) => !!s.summary);
+  const hasKey = useKeelcode((s) => s.hasApiKey);
+  const hasRepo = useKeelcode((s) => !!s.summary);
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end gap-2">

@@ -1,6 +1,6 @@
 import { getIndex } from "@/lib/engine/indexer";
 import { parseSource, sseResponse } from "@/lib/engine/stream";
-import { KeelError, type ModuleId } from "@/lib/engine/types";
+import { KeelcodeError, type ModuleId } from "@/lib/engine/types";
 import { runCartograph } from "@/lib/modules/cartograph";
 import { runInterrogator } from "@/lib/modules/interrogator";
 import { runPorter } from "@/lib/modules/porter";
@@ -18,9 +18,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ module: string
   const { module } = await ctx.params;
   const body = (await req.json().catch(() => null)) as { params?: Record<string, unknown> } | null;
   return sseResponse(async (emit) => {
-    if (!MODULES.includes(module as ModuleId)) throw new KeelError("NOT_FOUND", `Unknown module "${module}"`, 404);
+    if (!MODULES.includes(module as ModuleId)) throw new KeelcodeError("NOT_FOUND", `Unknown module "${module}"`, 404);
     const source = parseSource(body);
-    if (!hasApiKey()) throw new KeelError("NO_API_KEY", NO_KEY_MESSAGE, 503);
+    if (!hasApiKey()) throw new KeelcodeError("NO_API_KEY", NO_KEY_MESSAGE, 503);
     const { index, cached } = await getIndex(source, (m) => emit({ type: "progress", stage: "ingest", message: m }));
     if (!cached) {
       emit({ type: "summary", summary: index.summary });

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { runModule, openFile } from "@/lib/client/actions";
-import { useKeel } from "@/lib/client/store";
+import { useKeelcode } from "@/lib/client/store";
 import type { CaseResult, PorterResult } from "@/lib/modules/porter";
 import Markdown from "../ui/Markdown";
 import { CopyButton, DownloadButton, Tabs } from "../ui/bits";
@@ -26,7 +26,7 @@ function Gauge({ value, tone }: { value: number; tone: string }) {
 
 export default function Porter() {
   const run = useRun("porter");
-  const files = useKeel((s) => s.files);
+  const files = useKeelcode((s) => s.files);
   const candidates = useMemo(() => files.filter((f) => /Script|Python|Go|Ruby|Java|Rust|Kotlin|PHP/.test(f.lang) && !/(^|\/)(test|tests|__tests__)\/|\.(test|spec)\./.test(f.path) && f.lines <= 600), [files]);
   const [path, setPath] = useState("");
   const [target, setTarget] = useState("typescript");

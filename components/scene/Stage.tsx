@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { Component, useEffect, useState, type ReactNode } from "react";
-import { keel, useKeel } from "@/lib/client/store";
+import { kc, useKeelcode } from "@/lib/client/store";
 import Graph2D from "./Graph2D";
 
 const Graph3D = dynamic(() => import("./Graph3D"), { ssr: false, loading: () => null });
@@ -36,7 +36,7 @@ function detect(): { mode: "3d" | "2d"; reason?: string } {
 
 /** Full-viewport stage behind the UI. Picks 3D, falls back to 2D automatically. */
 export default function Stage() {
-  const pref = useKeel((s) => s.renderMode);
+  const pref = useKeelcode((s) => s.renderMode);
   const [auto, setAuto] = useState<{ mode: "3d" | "2d"; reason?: string } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   useEffect(() => {
@@ -66,7 +66,7 @@ function StageBadge({ mode, reason, canTry3d }: { mode: "3d" | "2d"; reason?: st
       <span className={mode === "3d" ? "text-sonar" : "text-ink-dim"}>RENDER {mode.toUpperCase()}</span>
       {reason && <span className="max-w-[260px] truncate" title={reason}>{reason}</span>}
       {canTry3d && (
-        <button className="underline-offset-2 hover:text-ink hover:underline" onClick={() => keel.set({ renderMode: mode === "3d" ? "2d" : "3d" })}>
+        <button className="underline-offset-2 hover:text-ink hover:underline" onClick={() => kc.set({ renderMode: mode === "3d" ? "2d" : "3d" })}>
           switch to {mode === "3d" ? "2D" : "3D"}
         </button>
       )}

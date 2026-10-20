@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { KeelcodeMark, Wordmark } from "../brand/Logo";
 
 const LINES = [
-  "KEEL/OS v1.0 — subsurface code recon",
+  "KEELCODE/OS v1.0 — subsurface code recon",
   "pressure hull ............ SEALED",
   "sonar array .............. ONLINE",
   "agent crew bay ........... 4 BERTHS READY",
@@ -19,7 +20,7 @@ export default function BootSequence() {
 
   useEffect(() => {
     let seen = false;
-    try { seen = sessionStorage.getItem("keel.booted") === "1"; } catch {}
+    try { seen = sessionStorage.getItem("keelcode.booted") === "1"; } catch {}
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (seen || reduced) return;
     setOpen(true);
@@ -36,7 +37,7 @@ export default function BootSequence() {
   }, []);
 
   function close() {
-    try { sessionStorage.setItem("keel.booted", "1"); } catch {}
+    try { sessionStorage.setItem("keelcode.booted", "1"); } catch {}
     setLeaving(true);
     setTimeout(() => setOpen(false), 450);
   }
@@ -49,13 +50,13 @@ export default function BootSequence() {
       role="presentation"
     >
       <div className="w-[min(520px,90vw)] font-mono text-[12px] leading-6">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="relative flex h-10 w-10 items-center justify-center">
-            <span className="absolute inset-0 rounded-full border border-sonar/30" />
-            <span className="absolute inset-0 animate-sweep rounded-full" style={{ background: "conic-gradient(from 0deg, rgba(53,242,194,.55), transparent 25%)" }} />
-            <span className="h-1.5 w-1.5 rounded-full bg-sonar shadow-[0_0_10px_#35f2c2]" />
+        <div className="mb-6 flex items-center gap-4">
+          <span className="relative flex h-16 w-16 items-center justify-center">
+            <span className="absolute inset-0 rounded-full border border-sonar/25" />
+            <span className="absolute inset-0 animate-sweep rounded-full" style={{ background: "conic-gradient(from 0deg, rgba(53,242,194,.45), transparent 25%)" }} />
+            <KeelcodeMark size={40} ping className="relative drop-shadow-[0_0_14px_rgba(53,242,194,.7)]" />
           </span>
-          <span className="font-hud text-xl font-bold tracking-[0.45em] text-ink">KEEL</span>
+          <Wordmark height={22} />
         </div>
         {LINES.slice(0, shown).map((l, i) => (
           <div key={i} className={`animate-rise ${i === LINES.length - 1 ? "text-sonar" : "text-ink-dim"}`}>

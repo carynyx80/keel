@@ -1,6 +1,7 @@
 "use client";
-import { useKeel } from "@/lib/client/store";
+import { useKeelcode } from "@/lib/client/store";
 import { Spinner } from "./ui/bits";
+import { KeelcodeMark } from "./brand/Logo";
 
 const CALL: Record<string, string> = { planner: "NAV", reader: "DIVER", synthesizer: "CHART", verifier: "AUDIT" };
 
@@ -11,8 +12,8 @@ function callSign(role: string, id: string) {
 
 /** Crew radio log: every agent transmission, newest first. */
 export default function ActivityLog() {
-  const log = useKeel((s) => s.log);
-  const progress = useKeel((s) => s.progress);
+  const log = useKeelcode((s) => s.log);
+  const progress = useKeelcode((s) => s.progress);
   const out = log.filter((l) => l.status === "start").length;
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -22,7 +23,12 @@ export default function ActivityLog() {
       </div>
       {progress && <p className="mb-2 flex items-center gap-2 font-mono text-[11px] text-ink-dim"><Spinner /> {progress}</p>}
       <ol className="min-h-0 flex-1 space-y-2 overflow-auto pr-1 font-mono text-[11px]" aria-live="polite">
-        {log.length === 0 && <li className="leading-relaxed text-ink-faint">Channel quiet. When a station runs, its navigator, divers and chart-maker report here as they work.</li>}
+        {log.length === 0 && (
+          <li className="flex flex-col items-center gap-3 py-6 text-center leading-relaxed text-ink-faint">
+            <KeelcodeMark size={40} color="rgba(53,242,194,.35)" dot="rgba(53,242,194,.5)" />
+            Channel quiet. When a station runs, its navigator, divers and chart-maker report here as they work.
+          </li>
+        )}
         {[...log].reverse().map((l, i) => (
           <li key={`${l.module}-${l.id}-${l.t}-${i}`} className="animate-rise">
             <div className="flex items-center gap-2">

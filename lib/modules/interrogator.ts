@@ -2,7 +2,7 @@ import "server-only";
 import { callText } from "@/lib/engine/llm";
 import { findingsText, plan, read, type Emit } from "@/lib/engine/dispatch";
 import type { RepoIndex } from "@/lib/engine/indexer";
-import { KeelError, type Citation } from "@/lib/engine/types";
+import { KeelcodeError, type Citation } from "@/lib/engine/types";
 
 export interface InterrogatorResult {
   question: string;
@@ -30,8 +30,8 @@ export async function runInterrogator(
   emit: Emit
 ): Promise<InterrogatorResult> {
   const question = (params.question ?? "").trim();
-  if (!question) throw new KeelError("BAD_REQUEST", "Ask a question first.");
-  if (question.length > 2000) throw new KeelError("BAD_REQUEST", "Question is too long (2000 chars max).");
+  if (!question) throw new KeelcodeError("BAD_REQUEST", "Ask a question first.");
+  if (question.length > 2000) throw new KeelcodeError("BAD_REQUEST", "Question is too long (2000 chars max).");
   const history = (params.history ?? []).slice(-4);
   const convo = history.map((h) => `Q: ${h.q}\nA: ${h.a.slice(0, 1500)}`).join("\n\n");
 

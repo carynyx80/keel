@@ -81,7 +81,7 @@ export interface Finding {
 }
 
 // Server-sent events. Every module streams these; the UI and the 3D scene consume them.
-export type KeelEvent =
+export type KeelcodeEvent =
   | { type: "progress"; stage: string; message: string; pct?: number }
   | { type: "summary"; summary: RepoSummary }
   | { type: "graph"; graph: RepoGraph }
@@ -94,7 +94,7 @@ export type KeelEvent =
   | { type: "error"; code: string; message: string }
   | { type: "done" };
 
-export class KeelError extends Error {
+export class KeelcodeError extends Error {
   constructor(public code: string, message: string, public status = 400) {
     super(message);
   }

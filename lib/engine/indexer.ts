@@ -291,8 +291,8 @@ export function buildIndex(raw: RawRepo): RepoIndex {
 // ---------- per-instance cache ----------
 // Serverless instances are reused while warm, so modules usually hit this cache.
 // On a cold instance we re-ingest from the source the client sends with every request.
-const g = globalThis as unknown as { __keelCache?: Map<string, RepoIndex> };
-const cache = (g.__keelCache ??= new Map());
+const g = globalThis as unknown as { __keelcodeCache?: Map<string, RepoIndex> };
+const cache = (g.__keelcodeCache ??= new Map());
 const CACHE_MAX = 8;
 
 export async function getIndex(source: RepoSource, onProgress: (msg: string) => void): Promise<{ index: RepoIndex; cached: boolean }> {

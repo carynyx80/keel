@@ -1,12 +1,12 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import type { Finding, KeelEvent, ModuleId, RepoGraph, RepoSource, RepoSummary } from "@/lib/engine/types";
+import type { Finding, KeelcodeEvent, ModuleId, RepoGraph, RepoSource, RepoSummary } from "@/lib/engine/types";
 import { clearDrones, launchDrone, recallDrone } from "./scope";
 
 export interface AgentEntry { id: string; role: string; status: "start" | "done" | "error"; label: string; detail?: string; t: number; module: string }
 export interface ModuleRun { running: boolean; error?: { code: string; message: string }; result?: unknown; partials: Record<string, unknown[]>; stream: string; findings: Finding[]; startedAt?: number; finishedAt?: number }
 
-export interface KeelState {
+export interface KeelcodeState {
   source: RepoSource | null;
   sourceLabel: string;
   ingesting: boolean;
@@ -27,7 +27,7 @@ export interface KeelState {
 
 const emptyRun = (): ModuleRun => ({ running: false, partials: {}, stream: "", findings: [] });
 
-const initial: KeelState = {
+const initial: KeelcodeState = {
   source: null,
   sourceLabel: "",
   ingesting: false,
@@ -55,9 +55,9 @@ export const pulse = (paths: string[], kind: "read" | "cite" = "read") => {
   for (const p of paths) pulses.set(p, { t, kind });
 };
 
-export const keel = {
+export const kc = {
   get: () => state,
-  set(patch: Partial<KeelState> | ((s: KeelState) => Partial<KeelState>)) {
+  set(patch: Partial<KeelcodeState> | ((s: KeelcodeState) => Partial<KeelcodeState>)) {
     state = { ...state, ...(typeof patch === "function" ? patch(state) : patch) };
     listeners.forEach((l) => l());
   },
@@ -68,26 +68,26 @@ export const keel = {
     };
   },
   updateRun(m: ModuleId, patch: Partial<ModuleRun> | ((r: ModuleRun) => Partial<ModuleRun>)) {
-    keel.set((s) => ({ runs: { ...s.runs, [m]: { ...s.runs[m], ...(typeof patch === "function" ? patch(s.runs[m]) : patch) } } }));
+    kc.set((s) => ({ runs: { ...s.runs, [m]: { ...s.runs[m], ...(typeof patch === "function" ? patch(s.runs[m]) : patch) } } }));
   },
   resetRuns() {
     clearDrones();
-    keel.set({ runs: { cartograph: emptyRun(), interrogator: emptyRun(), porter: emptyRun(), spec: emptyRun(), narrator: emptyRun() }, log: [] });
+    kc.set({ runs: { cartograph: emptyRun(), interrogator: emptyRun(), porter: emptyRun(), spec: emptyRun(), narrator: emptyRun() }, log: [] });
   },
 };
 
-export function useKeel<T>(sel: (s: KeelState) => T): T {
-  return useSyncExternalStore(keel.subscribe, () => sel(state), () => sel(initial));
+export function useKeelcode<T>(sel: (s: KeelcodeState) => T): T {
+  return useSyncExternalStore(kc.subscribe, () => sel(state), () => sel(initial));
 }
 
 /** POSTs JSON and parses a Server-Sent Events response. */
-export async function postSSE(url: string, body: unknown, onEvent: (e: KeelEvent) => void, signal?: AbortSignal) {
+export async function postSSE(url: string, body: unknown, onEvent: (e: KeelcodeEvent) => void, signal?: AbortSignal) {
   let res: Response;
   try {
     res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
   } catch (e) {
     if ((e as Error).name === "AbortError") return;
-    onEvent({ type: "error", code: "NETWORK", message: "Couldn't reach the Keel server." });
+    onEvent({ type: "error", code: "NETWORK", message: "Couldn't reach the Keelcode server." });
     return;
   }
   if (!res.ok || !res.body) {
@@ -111,7 +111,7 @@ export async function postSSE(url: string, body: unknown, onEvent: (e: KeelEvent
         buf = buf.slice(i + 2);
         for (const line of frame.split("\n")) {
           if (!line.startsWith("data: ")) continue;
-          const e = JSON.parse(line.slice(6)) as KeelEvent;
+          const e = JSON.parse(line.slice(6)) as KeelcodeEvent;
           if (e.type === "done") sawDone = true;
           onEvent(e);
         }
@@ -123,8 +123,8 @@ export async function postSSE(url: string, body: unknown, onEvent: (e: KeelEvent
   if (!sawDone) onEvent({ type: "error", code: "STREAM_CUT", message: "The connection closed before the job finished — most likely the serverless time limit. Try a smaller repo or a narrower question." });
 }
 
-export function logAgent(module: string, e: Extract<KeelEvent, { type: "agent" }>) {
-  keel.set((s) => {
+export function logAgent(module: string, e: Extract<KeelcodeEvent, { type: "agent" }>) {
+  kc.set((s) => {
     const log = [...s.log];
     const idx = log.findIndex((x) => x.id === e.id && x.module === module && x.status === "start");
     const entry: AgentEntry = { id: e.id, role: e.role, status: e.status, label: e.label, detail: e.detail, t: Date.now(), module };
@@ -138,16 +138,16 @@ export function logAgent(module: string, e: Extract<KeelEvent, { type: "agent" }
   else recallDrone(key);
 }
 
-export function handleCommon(e: KeelEvent, module: string) {
+export function handleCommon(e: KeelcodeEvent, module: string) {
   switch (e.type) {
     case "progress":
-      keel.set({ progress: e.message });
+      kc.set({ progress: e.message });
       break;
     case "summary":
-      keel.set({ summary: e.summary });
+      kc.set({ summary: e.summary });
       break;
     case "graph":
-      keel.set({ graph: e.graph });
+      kc.set({ graph: e.graph });
       break;
     case "agent":
       logAgent(module, e);

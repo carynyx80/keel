@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { keel, useKeel } from "@/lib/client/store";
+import { kc, useKeelcode } from "@/lib/client/store";
 import { loadSource, openFile, runModule } from "@/lib/client/actions";
 import type { ModuleId } from "@/lib/engine/types";
 import Stage from "./scene/Stage";
@@ -16,6 +16,7 @@ import Porter from "./modules/Porter";
 import Spec from "./modules/Spec";
 import Narrator from "./modules/Narrator";
 import { Button, ErrorBox, Hud, Spinner } from "./ui/bits";
+import { Logo, KeelcodeMark } from "./brand/Logo";
 
 export const MODULES: { id: ModuleId; code: string; name: string; role: string; glyph: string }[] = [
   { id: "cartograph", code: "ST-01", name: "Cartograph", role: "Hull survey", glyph: "M4 12h16M12 4v16M7 7l10 10M17 7 7 17" },
@@ -47,8 +48,8 @@ function ModuleBody({ id }: { id: ModuleId }) {
 }
 
 function Stations({ orientation }: { orientation: "row" | "col" }) {
-  const active = useKeel((s) => s.active);
-  const runs = useKeel((s) => s.runs);
+  const active = useKeelcode((s) => s.active);
+  const runs = useKeelcode((s) => s.runs);
   return (
     <nav aria-label="Stations" className={orientation === "col" ? "flex flex-col" : "flex gap-1 overflow-x-auto pb-1"}>
       {MODULES.map((m, i) => {
@@ -58,7 +59,7 @@ function Stations({ orientation }: { orientation: "row" | "col" }) {
         return (
           <button
             key={m.id}
-            onClick={() => keel.set({ active: m.id })}
+            onClick={() => kc.set({ active: m.id })}
             aria-current={on ? "page" : undefined}
             className={`group relative flex shrink-0 items-center gap-3 px-3 py-2.5 text-left transition ${orientation === "col" && i > 0 ? "border-t" : ""} ${on ? "bg-sonar/[0.09]" : "hover:bg-sonar/[0.04]"}`}
             style={{ borderColor: "var(--line)" }}
@@ -85,13 +86,13 @@ function Stations({ orientation }: { orientation: "row" | "col" }) {
 }
 
 function ContactCard() {
-  const selected = useKeel((s) => s.selected);
-  const graph = useKeel((s) => s.graph);
+  const selected = useKeelcode((s) => s.selected);
+  const graph = useKeelcode((s) => s.graph);
   const node = selected ? graph?.nodes.find((n) => n.id === selected) : null;
   if (!node) return null;
   const isFile = node.kind === "file";
   return (
-    <Hud code="CONTACT" title={node.label} solid className="pointer-events-auto animate-rise" bodyClass="px-3 py-2.5" right={<button className="text-ink-faint hover:text-ink" onClick={() => keel.set({ selected: null })} aria-label="Release contact">✕</button>}>
+    <Hud code="CONTACT" title={node.label} solid className="pointer-events-auto animate-rise" bodyClass="px-3 py-2.5" right={<button className="text-ink-faint hover:text-ink" onClick={() => kc.set({ selected: null })} aria-label="Release contact">✕</button>}>
       <div className="font-mono text-[11px] text-sonar/90">{node.id}</div>
       <div className="mt-2 grid grid-cols-4 gap-3">
         {[["Compartment", node.module], ["Lines", node.lines], ["Branches", node.complexity], ["Links", node.degree]].map(([k, v]) => (
@@ -101,10 +102,10 @@ function ContactCard() {
       {isFile && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           <Button className="!py-1 !text-[10px]" onClick={() => openFile(node.id)}>◎ Inspect</Button>
-          <Button className="!py-1 !text-[10px]" onClick={() => { keel.set({ active: "interrogator" }); runModule("interrogator", { question: `What is ${node.id} responsible for, and what breaks if it is deleted?`, history: [] }); }}>
+          <Button className="!py-1 !text-[10px]" onClick={() => { kc.set({ active: "interrogator" }); runModule("interrogator", { question: `What is ${node.id} responsible for, and what breaks if it is deleted?`, history: [] }); }}>
             ⚠ Impact if removed
           </Button>
-          <Button className="!py-1 !text-[10px]" onClick={() => keel.set({ active: "porter" })}>⇄ Port</Button>
+          <Button className="!py-1 !text-[10px]" onClick={() => kc.set({ active: "porter" })}>⇄ Port</Button>
         </div>
       )}
     </Hud>
@@ -112,24 +113,13 @@ function ContactCard() {
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className="flex shrink-0 items-center gap-3">
-      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden className="text-sonar drop-shadow-[0_0_8px_rgba(53,242,194,.6)]">
-        <circle cx="17" cy="17" r="15.5" fill="none" stroke="currentColor" strokeOpacity=".35" />
-        <path d="M5 13h24M8 13c2.2 8.5 5.5 12.5 9 12.5s6.8-4 9-12.5M17 25.5V31" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="square" />
-      </svg>
-      <div className="leading-none">
-        <h1 className="font-hud text-[19px] font-bold tracking-[0.42em] text-ink">KEEL</h1>
-        {!compact && <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.28em] text-sonar/70">Subsurface code recon</p>}
-      </div>
-    </div>
-  );
+  return <Logo size={compact ? 28 : 36} tagline={!compact} />;
 }
 
 function EmptyState() {
-  const progress = useKeel((s) => s.progress);
-  const ingesting = useKeel((s) => s.ingesting);
-  const ingestError = useKeel((s) => s.ingestError);
+  const progress = useKeelcode((s) => s.progress);
+  const ingesting = useKeelcode((s) => s.ingesting);
+  const ingestError = useKeelcode((s) => s.ingestError);
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6 pt-40">
       <div className="pointer-events-auto max-w-xl text-center">
@@ -139,9 +129,15 @@ function EmptyState() {
             <div className="mt-3"><Button variant="primary" onClick={() => loadSource({ kind: "demo" }, "harbor-api (demo)")}>▶ Dive the demo vessel instead</Button></div>
           </Hud>
         ) : ingesting ? (
-          <div className="hud hud-solid inline-flex items-center gap-3 px-5 py-3 font-mono text-xs text-ink-dim"><Spinner /> {progress || "Descending…"}</div>
+          <div className="hud hud-solid inline-flex items-center gap-3 px-5 py-3 font-mono text-xs text-ink-dim"><KeelcodeMark size={22} ping /> {progress || "Descending…"}</div>
         ) : (
           <div className="animate-rise">
+            <div className="relative mx-auto mb-5 flex h-28 w-28 items-center justify-center">
+              <span className="absolute inset-0 rounded-full border border-sonar/15" />
+              <span className="absolute inset-3 rounded-full border border-sonar/10" />
+              <span className="absolute inset-0 animate-sweep rounded-full motion-reduce:hidden" style={{ background: "conic-gradient(from 0deg, rgba(53,242,194,.28), transparent 22%)" }} />
+              <KeelcodeMark size={64} ping className="relative drop-shadow-[0_0_18px_rgba(53,242,194,.6)]" />
+            </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-sonar/80">◇ Awaiting contact ◇</p>
             <h2 className="mt-4 font-hud text-4xl font-semibold uppercase leading-[1.05] tracking-[0.06em] text-ink md:text-5xl">
               Dive into<br /><span className="text-sonar drop-shadow-[0_0_24px_rgba(53,242,194,.45)]">any codebase</span>
@@ -150,7 +146,7 @@ function EmptyState() {
               Every repo has a keel: the hidden structure everything else is built on. Send a crew of agents below to survey the hull, answer with citations, port modules, salvage specs and chart a guided dive.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              <Button variant="primary" className="!px-6 !py-3 !text-[13px]" onClick={async () => { if (await loadSource({ kind: "demo" }, "harbor-api (demo)") && keel.get().hasApiKey) runModule("cartograph"); }}>
+              <Button variant="primary" className="!px-6 !py-3 !text-[13px]" onClick={async () => { if (await loadSource({ kind: "demo" }, "harbor-api (demo)") && kc.get().hasApiKey) runModule("cartograph"); }}>
                 ▶ Dive the demo vessel
               </Button>
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">or paste a repo URL above</span>
@@ -162,15 +158,15 @@ function EmptyState() {
   );
 }
 
-export default function KeelApp() {
-  const active = useKeel((s) => s.active);
-  const summary = useKeel((s) => s.summary);
-  const hasKey = useKeel((s) => s.hasApiKey);
+export default function KeelcodeApp() {
+  const active = useKeelcode((s) => s.active);
+  const summary = useKeelcode((s) => s.summary);
+  const hasKey = useKeelcode((s) => s.hasApiKey);
   const [drawer, setDrawer] = useState(false);
   const [mobileTab, setMobileTab] = useState<"module" | "comms">("module");
 
   useEffect(() => {
-    fetch("/api/health").then((r) => r.json()).then((j) => keel.set({ hasApiKey: j.hasApiKey, model: j.model })).catch(() => {});
+    fetch("/api/health").then((r) => r.json()).then((j) => kc.set({ hasApiKey: j.hasApiKey, model: j.model })).catch(() => {});
   }, []);
 
   const mod = MODULES.find((m) => m.id === active)!;
@@ -185,7 +181,7 @@ export default function KeelApp() {
         {/* Command bar */}
         <header className="pointer-events-auto mx-auto w-full max-w-[1680px]">
           <div className="hud flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:gap-6">
-            <Brand />
+            <a href="/" aria-label="Keelcode home" className="shrink-0"><Brand /></a>
             <div className="min-w-0 flex-1"><SourceBar /></div>
             <div className="hidden xl:block"><Telemetry /></div>
           </div>
@@ -234,7 +230,8 @@ export default function KeelApp() {
             <div className="fixed inset-0 z-40 flex flex-col bg-abyss/50" onClick={() => setDrawer(false)}>
               <div className="hud hud-solid mt-auto flex max-h-[88dvh] flex-col" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-4 pt-3">
-                  <div className="flex gap-1">
+                  <div className="flex items-center gap-1">
+                    <KeelcodeMark size={20} className="mr-2" />
                     {(["module", "comms"] as const).map((t) => (
                       <button key={t} onClick={() => setMobileTab(t)} className={`px-2.5 py-1 font-hud text-[11px] font-semibold uppercase tracking-[0.18em] ${mobileTab === t ? "bg-sonar/15 text-sonar" : "text-ink-faint"}`}>{t === "module" ? "Console" : "Comms"}</button>
                     ))}

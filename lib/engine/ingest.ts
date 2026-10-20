@@ -8,7 +8,7 @@ import git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
 import JSZip from "jszip";
 import { DEMO_FILES, DEMO_REPO_NAME } from "@/lib/demo/bundle.generated";
-import { KeelError, type RepoSource } from "./types";
+import { KeelcodeError, type RepoSource } from "./types";
 
 // Honest limits for serverless: small/medium repos only.
 export const LIMITS = {
@@ -103,13 +103,13 @@ export async function ingest(source: RepoSource, onProgress: (msg: string) => vo
 async function ingestZip(repoId: string, source: Extract<RepoSource, { kind: "zip" }>, onProgress: (m: string) => void): Promise<RawRepo> {
   const buf = Buffer.from(source.base64, "base64");
   if (buf.length > LIMITS.zipBytes)
-    throw new KeelError("REPO_TOO_LARGE", `Zip is ${(buf.length / 1e6).toFixed(1)} MB; the limit is ${LIMITS.zipBytes / 1e6} MB. Strip node_modules/build output or upload a sub-folder.`, 413);
+    throw new KeelcodeError("REPO_TOO_LARGE", `Zip is ${(buf.length / 1e6).toFixed(1)} MB; the limit is ${LIMITS.zipBytes / 1e6} MB. Strip node_modules/build output or upload a sub-folder.`, 413);
   onProgress(`Unpacking ${source.name} (${(buf.length / 1024).toFixed(0)} KB)…`);
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(buf);
   } catch {
-    throw new KeelError("BAD_ZIP", "That file isn't a readable zip archive.");
+    throw new KeelcodeError("BAD_ZIP", "That file isn't a readable zip archive.");
   }
   const entries: [string, string][] = [];
   let unpacked = 0;
@@ -122,18 +122,18 @@ async function ingestZip(repoId: string, source: Extract<RepoSource, { kind: "zi
     if (n.startsWith("__MACOSX/") || !keep(rel)) continue;
     const content = await zip.files[n].async("string");
     unpacked += content.length;
-    if (unpacked > LIMITS.unpackedBytes) throw new KeelError("REPO_TOO_LARGE", "Archive expands past 40 MB of text — too large for a serverless run.", 413);
+    if (unpacked > LIMITS.unpackedBytes) throw new KeelcodeError("REPO_TOO_LARGE", "Archive expands past 40 MB of text — too large for a serverless run.", 413);
     entries.push([rel, content]);
   }
   const { files, skipped, truncated } = collect(entries);
-  if (files.size === 0) throw new KeelError("EMPTY_REPO", "No readable source files found in the archive.");
+  if (files.size === 0) throw new KeelcodeError("EMPTY_REPO", "No readable source files found in the archive.");
   return { repoId, name: source.name.replace(/\.zip$/i, ""), files, skipped: skipped + (names.length - entries.length), truncated };
 }
 
 async function ingestGit(repoId: string, source: Extract<RepoSource, { kind: "git" }>, onProgress: (m: string) => void): Promise<RawRepo> {
   const url = normalizeGitUrl(source.url);
   if (!/^https:\/\/[\w.-]+\/[\w.~-]+\/[\w.~-]+$/.test(url) && !/^https:\/\/[\w.-]+\/[\w.~/-]+$/.test(url))
-    throw new KeelError("BAD_URL", "Use a public HTTPS Git URL, e.g. https://github.com/owner/repo");
+    throw new KeelcodeError("BAD_URL", "Use a public HTTPS Git URL, e.g. https://github.com/owner/repo");
   const dir = path.join(os.tmpdir(), "keel", repoId);
   await rm(dir, { recursive: true, force: true });
   await mkdir(dir, { recursive: true });
@@ -157,16 +157,16 @@ async function ingestGit(repoId: string, source: Extract<RepoSource, { kind: "gi
     },
   });
   const timeout = new Promise<never>((_, rej) =>
-    setTimeout(() => rej(new KeelError("CLONE_TIMEOUT", `Clone took longer than ${LIMITS.cloneTimeoutMs / 1000}s. The repo is probably too large for a serverless run; upload a zip of the folder you care about instead.`, 504)), LIMITS.cloneTimeoutMs)
+    setTimeout(() => rej(new KeelcodeError("CLONE_TIMEOUT", `Clone took longer than ${LIMITS.cloneTimeoutMs / 1000}s. The repo is probably too large for a serverless run; upload a zip of the folder you care about instead.`, 504)), LIMITS.cloneTimeoutMs)
   );
   try {
     await Promise.race([clone, timeout]);
   } catch (e) {
-    if (e instanceof KeelError) throw e;
+    if (e instanceof KeelcodeError) throw e;
     const msg = e instanceof Error ? e.message : String(e);
-    if (/401|403|auth/i.test(msg)) throw new KeelError("CLONE_FAILED", "Clone was refused — the repo is private or the URL is wrong. Keel only clones public repos; upload a zip for private code.", 400);
-    if (/404|not found/i.test(msg)) throw new KeelError("CLONE_FAILED", "Repository not found. Check the URL (and branch, if you set one).", 404);
-    throw new KeelError("CLONE_FAILED", `Clone failed: ${msg}`, 502);
+    if (/401|403|auth/i.test(msg)) throw new KeelcodeError("CLONE_FAILED", "Clone was refused — the repo is private or the URL is wrong. Keelcode only clones public repos; upload a zip for private code.", 400);
+    if (/404|not found/i.test(msg)) throw new KeelcodeError("CLONE_FAILED", "Repository not found. Check the URL (and branch, if you set one).", 404);
+    throw new KeelcodeError("CLONE_FAILED", `Clone failed: ${msg}`, 502);
   }
 
   onProgress("Reading checkout…");
@@ -180,7 +180,7 @@ async function ingestGit(repoId: string, source: Extract<RepoSource, { kind: "gi
       } else if (ent.isFile() && keep(r)) {
         const s = await stat(path.join(abs, ent.name));
         bytes += s.size;
-        if (bytes > LIMITS.unpackedBytes) throw new KeelError("REPO_TOO_LARGE", "Repository source exceeds 40 MB — too large for a serverless run. Upload a zip of a sub-folder instead.", 413);
+        if (bytes > LIMITS.unpackedBytes) throw new KeelcodeError("REPO_TOO_LARGE", "Repository source exceeds 40 MB — too large for a serverless run. Upload a zip of a sub-folder instead.", 413);
         if (s.size <= LIMITS.maxFileBytes) entries.push([r, await readFile(path.join(abs, ent.name), "utf8")]);
       }
     }
@@ -188,6 +188,6 @@ async function ingestGit(repoId: string, source: Extract<RepoSource, { kind: "gi
   await walk(dir, "");
   rm(dir, { recursive: true, force: true }).catch(() => {});
   const { files, skipped, truncated } = collect(entries);
-  if (files.size === 0) throw new KeelError("EMPTY_REPO", "No readable source files found in that repository.");
+  if (files.size === 0) throw new KeelcodeError("EMPTY_REPO", "No readable source files found in that repository.");
   return { repoId, name: url.split("/").slice(-1)[0], files, skipped, truncated };
 }

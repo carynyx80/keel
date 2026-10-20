@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { keel, pulse, useKeel } from "@/lib/client/store";
+import { kc, pulse, useKeelcode } from "@/lib/client/store";
 import { fetchFile, openFile } from "@/lib/client/actions";
 import { Spinner } from "./ui/bits";
+import { KeelcodeMark } from "./brand/Logo";
 
 /** Inspection port: the source of a contact, with the cited lines lit. */
 export default function CodeViewer() {
-  const viewer = useKeel((s) => s.viewer);
+  const viewer = useKeelcode((s) => s.viewer);
   const [file, setFile] = useState<Awaited<ReturnType<typeof fetchFile>> | null>(null);
   const [err, setErr] = useState("");
   const hl = useRef<HTMLDivElement>(null);
@@ -26,7 +27,7 @@ export default function CodeViewer() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") keel.set({ viewer: null });
+      if (e.key === "Escape") kc.set({ viewer: null });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -37,12 +38,12 @@ export default function CodeViewer() {
   const end = viewer.endLine ?? start;
   const lines = file?.content.split("\n") ?? [];
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-abyss/70 p-0 backdrop-blur-[2px] md:items-center md:p-8" onClick={() => keel.set({ viewer: null })}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-abyss/70 p-0 backdrop-blur-[2px] md:items-center md:p-8" onClick={() => kc.set({ viewer: null })}>
       <div role="dialog" aria-label={`Source of ${viewer.path}`} className="hud hud-solid flex max-h-[86vh] w-full max-w-4xl animate-rise flex-col" onClick={(e) => e.stopPropagation()}>
         <header className="hud-head !py-2.5">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="hud-code">INSPECT</span>
+              <KeelcodeMark size={16} /><span className="hud-code">INSPECT</span>
               <span className="truncate font-mono text-[13px] text-ink">{viewer.path}</span>
               {start ? <span className="font-mono text-[13px] text-sonar">:{start}{end > start ? `-${end}` : ""}</span> : null}
             </div>
@@ -53,11 +54,11 @@ export default function CodeViewer() {
               </div>
             )}
           </div>
-          <button className="px-2 py-1 font-mono text-ink-dim hover:text-ink" onClick={() => keel.set({ viewer: null })} aria-label="Close">ESC ✕</button>
+          <button className="px-2 py-1 font-mono text-ink-dim hover:text-ink" onClick={() => kc.set({ viewer: null })} aria-label="Close">ESC ✕</button>
         </header>
         <div className="overflow-auto py-2 font-mono text-[12px] leading-5">
           {err && <p className="px-4 text-alarm">⚠ {err}</p>}
-          {!file && !err && <p className="flex items-center gap-2 px-4 text-ink-faint"><Spinner /> Retrieving from the hull…</p>}
+          {!file && !err && <p className="flex items-center gap-2 px-4 text-ink-faint"><KeelcodeMark size={18} ping /> Retrieving from the hull…</p>}
           {lines.map((l, i) => {
             const n = i + 1;
             const on = start > 0 && n >= start && n <= end;

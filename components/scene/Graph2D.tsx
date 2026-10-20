@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useMemo, useRef } from "react";
-import { keel, pulses, useKeel } from "@/lib/client/store";
+import { kc, pulses, useKeelcode } from "@/lib/client/store";
 import { drones } from "@/lib/client/scope";
 import { computeLayout, hullDepth, IDLE_HULL, stageFreeWidth, stageOffsetX, type Layout } from "./layout";
 
 /** 2D fallback: a side-elevation schematic of the same vessel, with the same live signals. */
 export default function Graph2D() {
-  const graph = useKeel((s) => s.graph);
-  const busy = useKeel((s) => s.ingesting || Object.values(s.runs).some((r) => r.running));
-  const panels = useKeel((s) => !!s.summary);
+  const graph = useKeelcode((s) => s.graph);
+  const busy = useKeelcode((s) => s.ingesting || Object.values(s.runs).some((r) => r.running));
+  const panels = useKeelcode((s) => !!s.summary);
   const layout = useMemo<Layout | null>(() => (graph && graph.nodes.length ? computeLayout(graph) : null), [graph]);
   const canvas = useRef<HTMLCanvasElement>(null);
   const hover = useRef<string | null>(null);
@@ -94,7 +94,7 @@ export default function Graph2D() {
       ctx.beginPath(); ctx.moveTo(X(sx), 0); ctx.lineTo(X(sx), h); ctx.stroke();
 
       if (layout) {
-        const sel = keel.get().selected;
+        const sel = kc.get().selected;
         const active = hover.current ?? sel;
         const nb = active ? layout.neighbors.get(active) : null;
         const P = (n: Layout["nodes"][number]) => ({ x: X(n.z), y: Y(n.y) + n.x * scale * 0.18 });
@@ -174,7 +174,7 @@ export default function Graph2D() {
       ref={canvas}
       className="h-full w-full"
       onPointerMove={(e) => { hover.current = pick(e); e.currentTarget.style.cursor = hover.current ? "crosshair" : ""; }}
-      onClick={(e) => keel.set({ selected: pick(e) })}
+      onClick={(e) => kc.set({ selected: pick(e) })}
     />
   );
 }

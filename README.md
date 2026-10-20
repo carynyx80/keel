@@ -1,10 +1,16 @@
-# Keel
+<p align="center">
+  <img src="public/brand/keelcode-logo.svg" alt="Keelcode" width="460">
+</p>
 
-**Keel is a code-comprehension workbench.** Point a room of AI agents at your own repository, or at an undocumented open-source dependency you rely on. You get back architecture maps, cited answers, ports to other languages, recovered specs and onboarding tours.
+<p align="center"><b>Dive into any codebase.</b> · <a href="https://keelcode.xyz">keelcode.xyz</a></p>
 
-The name comes from the keel of a ship: the hidden structure the whole hull is built on. Recovering that structure is what Keel does.
+# Keelcode
 
-Keel only analyzes code you have the right to analyze: your own repos, public open-source repos, or a zip you upload.
+**Keelcode is a code-comprehension workbench.** Point a room of AI agents at your own repository, or at an undocumented open-source dependency you rely on. You get back architecture maps, cited answers, ports to other languages, recovered specs and onboarding tours.
+
+The name comes from the keel of a ship: the hidden structure the whole hull is built on. Recovering that structure is what Keelcode does.
+
+Keelcode only analyzes code you have the right to analyze: your own repos, public open-source repos, or a zip you upload.
 
 ## Modules
 
@@ -34,7 +40,7 @@ Requires Node 20 or later. The one environment variable that matters:
 |---|---|---|
 | `OPENAI_API_KEY` | yes, for agent modules | Read only on the server and never sent to the browser. Without it, ingest and the 3D map still work, and the agent modules show a clear "no API key" error. |
 | `OPENAI_MODEL` | no | Defaults to `gpt-5.5`. Set it to any chat model your key can use that supports structured outputs. |
-| `ANTHROPIC_API_KEY` | no | Alternative provider. Used only when `OPENAI_API_KEY` is unset; the agents then run on Claude (`KEEL_MODEL`, default `claude-opus-5-5`). |
+| `ANTHROPIC_API_KEY` | no | Alternative provider. Used only when `OPENAI_API_KEY` is unset; the agents then run on Claude (`KEELCODE_MODEL`, default `claude-opus-5-5`). |
 
 To force the 2D fallback renderer, open `/?render=2d`.
 
@@ -80,7 +86,7 @@ Agents call OpenAI's Chat Completions API through the `openai` SDK (`lib/engine/
 
 ### The simulation
 
-Keel draws your codebase as a vessel seen from a submarine control room. Everything on screen is driven by real data and real agent activity.
+Keelcode draws your codebase as a vessel seen from a submarine control room. Everything on screen is driven by real data and real agent activity.
 
 - **The hull is the repo.** Each module is a compartment along the keel, ordered bow to stern by dependency flow: modules that mostly import others (entry points, routes) sit forward, and foundations (libs, stores) sit aft. Files are contacts packed inside the hull's cross-section, sized by line count.
 - **Conduits are imports.** Every internal import is a glowing cable arching between two contacts, with data packets flowing along it. Hover a contact to light up its conduits; click it to steer the camera to it and open a contact card (inspect, impact-if-removed, port).
@@ -94,7 +100,7 @@ Keel draws your codebase as a vessel seen from a submarine control room. Everyth
 
 ## Known limits
 
-These are the real limits. Where something can't run inside a Vercel function, Keel says so in the UI instead of faking it.
+These are the real limits. Where something can't run inside a Vercel function, Keelcode says so in the UI instead of faking it.
 
 | Limit | Value | Why |
 |---|---|---|
@@ -104,8 +110,8 @@ These are the real limits. Where something can't run inside a Vercel function, K
 | Clone timeout | 45 s | A larger repo should be uploaded as a zip of the folder you care about. |
 | Job duration | `maxDuration = 300` s per module run | Needs Vercel Fluid Compute, the default for new projects. Typical runs take 1–3 minutes. A job that gets cut off shows a "connection closed before the job finished" error. |
 | Private repos | not cloned | Upload them as a zip instead. |
-| Index cache | per warm instance | On a cold start, the client sends the repo source again and Keel re-indexes it, usually in under a second. Each zip run re-uploads the zip. |
-| Retrieval | sparse vectors (feature-hashed TF-IDF over code-aware tokens) | Keeps Keel free of any external database and of a second paid embeddings call per run. `VectorStore` is an interface (`lib/engine/vector.ts`), so a hosted embedding store can be dropped in later. |
+| Index cache | per warm instance | On a cold start, the client sends the repo source again and Keelcode re-indexes it, usually in under a second. Each zip run re-uploads the zip. |
+| Retrieval | sparse vectors (feature-hashed TF-IDF over code-aware tokens) | Keeps Keelcode free of any external database and of a second paid embeddings call per run. `VectorStore` is an interface (`lib/engine/vector.ts`), so a hosted embedding store can be dropped in later. |
 | Porter equivalence | **executed** only for JS/TS → TypeScript/JavaScript | Both the original and the port run in a constrained `node:vm` context: no `process`, no fs, network or Node built-ins, in-repo relative imports only, and a 1 s timeout per call. Outputs are compared structurally. |
 | Porter equivalence | **model-traced** for Python, Go and Rust targets, or non-JS sources | Those languages can't run inside a Vercel Node function. A verifier agent traces the port by hand against the original's *executed* outputs, and the report labels the result as an estimate. |
 | Porter file size | ≤ 600 lines per module | Keeps one run within the time limit. |
@@ -118,6 +124,18 @@ These are the real limits. Where something can't run inside a Vercel function, K
 2. In the Vercel project, go to **Settings → Environment Variables** and add `OPENAI_API_KEY` for Production (and Preview if you use it).
 3. Redeploy. The build command is `npm run build`, which bundles `demo-repo/` into `lib/demo/bundle.generated.ts` first.
 4. Check `/api/health`. It returns `{ "hasApiKey": true, "provider": "openai", "model": "…" }` once the key is set.
+
+## Brand
+
+| Asset | File |
+|---|---|
+| Logo (dark background) | `public/brand/keelcode-logo.svg` |
+| Logo (transparent, for dark surfaces) | `public/brand/keelcode-logo-transparent.svg` |
+| Logo (for light surfaces) | `public/brand/keelcode-logo-light.svg` |
+| Symbol | `public/brand/keelcode-symbol.svg`, `keelcode-symbol-tile.svg`, `keelcode-symbol-mono.svg` |
+| Favicon / Apple icon / social card | `app/icon.svg`, `app/apple-icon.tsx`, `app/opengraph-image.tsx` |
+
+The symbol is a pair of code brackets `‹ ›` whose lower arms close into a V-hull, with a keel fin beneath and a sonar contact at the centre: code and vessel in one shape. The wordmark is drawn as chamfered paths, so it needs no font. Both come from one source, `components/brand/Logo.tsx`; regenerate the static files with `npx tsx scripts/brand.tsx`.
 
 ## Project layout
 

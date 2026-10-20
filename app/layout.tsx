@@ -7,7 +7,11 @@ const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Keel — code-comprehension workbench",
+  metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
+  applicationName: "Keelcode",
+  title: { default: "Keelcode — dive into any codebase", template: "%s · Keelcode" },
+  openGraph: { siteName: "Keelcode", type: "website" },
+  twitter: { card: "summary_large_image" },
   description: "Dive into a codebase. A crew of AI agents maps its hull, answers with citations, ports modules, recovers specs and charts onboarding tours.",
 };
 export const viewport: Viewport = { themeColor: "#02060a", width: "device-width", initialScale: 1 };

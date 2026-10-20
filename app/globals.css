@@ -76,25 +76,25 @@ body {
 }
 
 /* Rendered Markdown from agents */
-.prose-keel { @apply text-[13.5px] leading-relaxed text-ink/90; }
-.prose-keel h1 { @apply mb-2 mt-5 font-hud text-base font-semibold uppercase tracking-[0.12em] text-sonar-glow; }
-.prose-keel h2 { @apply mb-2 mt-5 font-hud text-[13px] font-semibold uppercase tracking-[0.14em] text-sonar; }
-.prose-keel h3, .prose-keel h4 { @apply mb-1 mt-3 font-hud text-xs font-semibold uppercase tracking-[0.12em] text-ink; }
-.prose-keel p { @apply my-2; }
-.prose-keel ul { @apply my-2 list-none pl-0; }
-.prose-keel ul > li { @apply relative pl-4; }
-.prose-keel ul > li::before { content: "›"; @apply absolute left-0 text-sonar; }
-.prose-keel ol { @apply my-2 list-decimal pl-5 marker:text-sonar; }
-.prose-keel li { @apply my-1; }
-.prose-keel code { @apply bg-sonar/[0.07] px-1 py-0.5 font-mono text-[12px] text-sonar-glow; }
-.prose-keel pre { @apply my-2 overflow-auto border p-3; border-color: var(--line); background: rgba(2, 6, 10, 0.7); }
-.prose-keel pre code { @apply bg-transparent p-0 text-ink/90; }
-.prose-keel a { @apply text-sonar underline underline-offset-2; }
-.prose-keel table { @apply my-2 w-full text-left text-xs; }
-.prose-keel th { @apply font-hud uppercase tracking-wider text-ink-dim; }
-.prose-keel th, .prose-keel td { @apply border-b py-1 pr-3; border-color: var(--line); }
-.prose-keel blockquote { @apply border-l-2 border-sonar/40 pl-3 text-ink-dim; }
-.prose-keel strong { @apply font-semibold text-ink; }
+.prose-keelcode { @apply text-[13.5px] leading-relaxed text-ink/90; }
+.prose-keelcode h1 { @apply mb-2 mt-5 font-hud text-base font-semibold uppercase tracking-[0.12em] text-sonar-glow; }
+.prose-keelcode h2 { @apply mb-2 mt-5 font-hud text-[13px] font-semibold uppercase tracking-[0.14em] text-sonar; }
+.prose-keelcode h3, .prose-keelcode h4 { @apply mb-1 mt-3 font-hud text-xs font-semibold uppercase tracking-[0.12em] text-ink; }
+.prose-keelcode p { @apply my-2; }
+.prose-keelcode ul { @apply my-2 list-none pl-0; }
+.prose-keelcode ul > li { @apply relative pl-4; }
+.prose-keelcode ul > li::before { content: "›"; @apply absolute left-0 text-sonar; }
+.prose-keelcode ol { @apply my-2 list-decimal pl-5 marker:text-sonar; }
+.prose-keelcode li { @apply my-1; }
+.prose-keelcode code { @apply bg-sonar/[0.07] px-1 py-0.5 font-mono text-[12px] text-sonar-glow; }
+.prose-keelcode pre { @apply my-2 overflow-auto border p-3; border-color: var(--line); background: rgba(2, 6, 10, 0.7); }
+.prose-keelcode pre code { @apply bg-transparent p-0 text-ink/90; }
+.prose-keelcode a { @apply text-sonar underline underline-offset-2; }
+.prose-keelcode table { @apply my-2 w-full text-left text-xs; }
+.prose-keelcode th { @apply font-hud uppercase tracking-wider text-ink-dim; }
+.prose-keelcode th, .prose-keelcode td { @apply border-b py-1 pr-3; border-color: var(--line); }
+.prose-keelcode blockquote { @apply border-l-2 border-sonar/40 pl-3 text-ink-dim; }
+.prose-keelcode strong { @apply font-semibold text-ink; }
 
 .mermaid-box svg { max-width: 100%; height: auto; }
 

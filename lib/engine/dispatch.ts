@@ -1,9 +1,9 @@
 import "server-only";
 import { callJSON, S } from "./llm";
 import { fileTree, numbered, type RepoIndex } from "./indexer";
-import type { Finding, KeelEvent } from "./types";
+import type { Finding, KeelcodeEvent } from "./types";
 
-export type Emit = (e: KeelEvent) => void;
+export type Emit = (e: KeelcodeEvent) => void;
 
 export interface Slice {
   path: string;

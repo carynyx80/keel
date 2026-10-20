@@ -37,7 +37,7 @@ export default function Markdown({ text, className = "" }: { text: string; class
   const html = useMemo(() => md.parse(linkifyCitations(text), { async: false }) as string, [text]);
   return (
     <div
-      className={`prose-keel ${className}`}
+      className={`prose-keelcode ${className}`}
       onClick={(e) => {
         const el = (e.target as HTMLElement).closest("button.cite") as HTMLElement | null;
         if (!el) return;

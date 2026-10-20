@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useKeel } from "@/lib/client/store";
+import { useKeelcode } from "@/lib/client/store";
 import { Readout } from "../ui/bits";
 
 function useClock() {
@@ -16,11 +16,11 @@ function useClock() {
 
 /** Live readouts derived from the indexed repo and the crew's state. */
 export default function Telemetry() {
-  const graph = useKeel((s) => s.graph);
-  const summary = useKeel((s) => s.summary);
-  const log = useKeel((s) => s.log);
-  const hasKey = useKeel((s) => s.hasApiKey);
-  const model = useKeel((s) => s.model);
+  const graph = useKeelcode((s) => s.graph);
+  const summary = useKeelcode((s) => s.summary);
+  const log = useKeelcode((s) => s.log);
+  const hasKey = useKeelcode((s) => s.hasApiKey);
+  const model = useKeelcode((s) => s.model);
   const clock = useClock();
   const crew = log.filter((l) => l.status === "start").length;
   return (

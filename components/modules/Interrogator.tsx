@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { runModule, openFile } from "@/lib/client/actions";
-import { useKeel } from "@/lib/client/store";
+import { useKeelcode } from "@/lib/client/store";
 import type { InterrogatorResult } from "@/lib/modules/interrogator";
 import Markdown from "../ui/Markdown";
 import { CiteChip, Spinner } from "../ui/bits";
@@ -11,7 +11,7 @@ const SUGGEST = ["Where is auth enforced?", "What breaks if I delete the pricing
 
 export default function Interrogator() {
   const run = useRun("interrogator");
-  const repoId = useKeel((s) => s.summary?.repoId);
+  const repoId = useKeelcode((s) => s.summary?.repoId);
   const [q, setQ] = useState("");
   const [history, setHistory] = useState<InterrogatorResult[]>([]);
   const pending = useRef<string>("");

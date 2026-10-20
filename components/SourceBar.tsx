@@ -1,23 +1,23 @@
 "use client";
 import { useRef, useState } from "react";
 import { loadSource, runModule } from "@/lib/client/actions";
-import { keel, useKeel } from "@/lib/client/store";
+import { kc, useKeelcode } from "@/lib/client/store";
 import { Button, Spinner } from "./ui/bits";
 
 const MAX_ZIP = 3 * 1024 * 1024;
 
 export default function SourceBar() {
-  const ingesting = useKeel((s) => s.ingesting);
-  const label = useKeel((s) => s.sourceLabel);
-  const summary = useKeel((s) => s.summary);
+  const ingesting = useKeelcode((s) => s.ingesting);
+  const label = useKeelcode((s) => s.sourceLabel);
+  const summary = useKeelcode((s) => s.summary);
   const [url, setUrl] = useState("");
   const [err, setErr] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
   const demo = async () => {
     setErr("");
-    keel.set({ active: "cartograph" });
-    if ((await loadSource({ kind: "demo" }, "harbor-api (demo)")) && keel.get().hasApiKey) runModule("cartograph");
+    kc.set({ active: "cartograph" });
+    if ((await loadSource({ kind: "demo" }, "harbor-api (demo)")) && kc.get().hasApiKey) runModule("cartograph");
   };
   const clone = () => {
     setErr("");

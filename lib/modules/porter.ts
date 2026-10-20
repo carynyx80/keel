@@ -5,7 +5,7 @@ import type { Emit } from "@/lib/engine/dispatch";
 import { numbered, type RepoIndex } from "@/lib/engine/indexer";
 import { Sandbox, sameOutcome, type Outcome } from "@/lib/engine/sandbox";
 import { lineDiff, type DiffLine } from "@/lib/engine/diff";
-import { KeelError } from "@/lib/engine/types";
+import { KeelcodeError } from "@/lib/engine/types";
 
 export const PORT_TARGETS = {
   typescript: { label: "TypeScript", ext: ".ts", executable: true },
@@ -49,10 +49,10 @@ function relatedTests(index: RepoIndex, file: string) {
 export async function runPorter(index: RepoIndex, params: { path?: string; target?: string }, emit: Emit): Promise<PorterResult> {
   const sourcePath = params.path ?? "";
   const file = index.files.get(sourcePath);
-  if (!file) throw new KeelError("BAD_REQUEST", "Pick a file to port.");
-  if (file.lines > 600) throw new KeelError("TOO_LARGE", "Porter handles files up to 600 lines in a single serverless run. Pick a smaller module.");
+  if (!file) throw new KeelcodeError("BAD_REQUEST", "Pick a file to port.");
+  if (file.lines > 600) throw new KeelcodeError("TOO_LARGE", "Porter handles files up to 600 lines in a single serverless run. Pick a smaller module.");
   const target = (params.target ?? "typescript") as PortTarget;
-  if (!(target in PORT_TARGETS)) throw new KeelError("BAD_REQUEST", "Unsupported target language.");
+  if (!(target in PORT_TARGETS)) throw new KeelcodeError("BAD_REQUEST", "Unsupported target language.");
   const tgt = PORT_TARGETS[target];
 
   const tests = relatedTests(index, sourcePath);

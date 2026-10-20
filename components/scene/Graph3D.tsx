@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { Billboard, Html, OrbitControls } from "@react-three/drei";
 import { Bloom, EffectComposer, Noise, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { keel, pulses, useKeel } from "@/lib/client/store";
+import { kc, pulses, useKeelcode } from "@/lib/client/store";
 import { drones, scope } from "@/lib/client/scope";
 import { computeLayout, hullDepth, hullFloor, hullWidth, IDLE_HULL, stageFreeWidth, stageOffsetX, type Compartment, type Layout } from "./layout";
 
@@ -89,12 +89,45 @@ function HullFrame({ hull, compartments, busy }: { hull: Hull; compartments: Com
   );
 }
 
-/** Conning tower at the bow: where the crew launches from. */
+/** The Keelcode mark as glowing line geometry (64×64 SVG grid → world units). */
+function useMarkGeometry(size: number) {
+  return useMemo(() => {
+    const P = (x: number, y: number) => [((x - 32) / 64) * size, (-(y - 32) / 64) * size, 0];
+    const hull = [[23, 11], [8, 27], [32, 51], [56, 27], [41, 11]];
+    const pts: number[] = [];
+    for (let i = 1; i < hull.length; i++) pts.push(...P(hull[i - 1][0], hull[i - 1][1]), ...P(hull[i][0], hull[i][1]));
+    pts.push(...P(32, 51), ...P(32, 61));
+    // ring centred on the origin; placed at the contact position by the caller
+    const ring: number[] = [];
+    const rr = (7 / 64) * size;
+    for (let i = 0; i < 40; i++) {
+      const a0 = (i / 40) * Math.PI * 2, a1 = ((i + 1) / 40) * Math.PI * 2;
+      ring.push(Math.cos(a0) * rr, Math.sin(a0) * rr, 0, Math.cos(a1) * rr, Math.sin(a1) * rr, 0);
+    }
+    const g = (a: number[]) => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(a, 3));
+      return geo;
+    };
+    return { mark: g(pts), ring: g(ring), dot: P(32, 29) as [number, number, number] };
+  }, [size]);
+}
+
+/** Conning tower at the bow: where the crew launches from, flying the Keelcode mark. */
 function Bridge({ hull }: { hull: Hull }) {
   const z = hull.halfLength - 6;
-  const ring = useRef<THREE.Mesh>(null);
+  const beacon = useRef<THREE.Group>(null);
+  const ring = useRef<THREE.LineSegments>(null);
+  const { mark, ring: ringGeo, dot } = useMarkGeometry(9);
+  const mast = useMemo(() => new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 6, 0), new THREE.Vector3(0, 9.5, 0)]), []);
   useFrame(({ clock }) => {
-    if (ring.current) ring.current.rotation.z = clock.elapsedTime * 0.8;
+    const t = clock.elapsedTime;
+    if (beacon.current) beacon.current.position.y = 13 + Math.sin(t * 1.2) * 0.5;
+    if (ring.current) {
+      const k = (t * 0.6) % 1;
+      ring.current.scale.setScalar(1 + k * 1.8);
+      (ring.current.material as THREE.LineBasicMaterial).opacity = (1 - k) * 0.8;
+    }
   });
   return (
     <group position={[0, hull.deck, z]}>
@@ -102,14 +135,26 @@ function Bridge({ hull }: { hull: Hull }) {
         <boxGeometry args={[4, 6, 7]} />
         <meshBasicMaterial color="#35f2c2" wireframe transparent opacity={0.35} />
       </mesh>
-      <mesh ref={ring} position={[0, 8.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.4, 0.08, 6, 40, Math.PI * 1.6]} />
-        <meshBasicMaterial color={[0.6, 2.2, 1.8]} toneMapped={false} />
-      </mesh>
-      <mesh position={[0, 8.5, 0]}>
-        <sphereGeometry args={[0.45, 12, 12]} />
-        <meshBasicMaterial color={[0.8, 3, 2.4]} toneMapped={false} />
-      </mesh>
+      <lineSegments geometry={mast}>
+        <lineBasicMaterial color="#35f2c2" transparent opacity={0.5} />
+      </lineSegments>
+      <group ref={beacon} position={[0, 13, 0]}>
+        <Billboard>
+          <lineSegments geometry={mark}>
+            <lineBasicMaterial color={[0.7, 3.2, 2.5]} toneMapped={false} />
+          </lineSegments>
+          <lineSegments geometry={ringGeo} position={dot}>
+            <lineBasicMaterial color={[0.5, 2, 1.6]} toneMapped={false} transparent opacity={0.6} />
+          </lineSegments>
+          <lineSegments ref={ring} geometry={ringGeo} position={dot}>
+            <lineBasicMaterial color={[0.6, 2.4, 2]} toneMapped={false} transparent opacity={0.6} depthWrite={false} />
+          </lineSegments>
+          <mesh position={dot}>
+            <circleGeometry args={[0.42, 20]} />
+            <meshBasicMaterial color={[1, 4, 3.2]} toneMapped={false} />
+          </mesh>
+        </Billboard>
+      </group>
     </group>
   );
 }
@@ -196,7 +241,7 @@ function Vessel({ layout, reduced }: { layout: Layout; reduced: boolean }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const halo = useRef<THREE.InstancedMesh>(null);
   const [hover, setHover] = useState<string | null>(null);
-  const selected = useKeel((s) => s.selected);
+  const selected = useKeelcode((s) => s.selected);
   const controls = useThree((s) => s.controls) as unknown as { target: THREE.Vector3; update(): void } | null;
   const camera = useThree((s) => s.camera);
   const focus = useRef<THREE.Vector3 | null>(null);
@@ -351,7 +396,7 @@ function Vessel({ layout, reduced }: { layout: Layout; reduced: boolean }) {
         args={[undefined, undefined, layout.nodes.length]}
         onPointerMove={(e) => { e.stopPropagation(); const n = pick(e); setHover(n?.id ?? null); document.body.style.cursor = n ? "crosshair" : ""; }}
         onPointerOut={() => { setHover(null); document.body.style.cursor = ""; }}
-        onClick={(e) => { e.stopPropagation(); const n = pick(e); if (n) keel.set({ selected: n.id }); }}
+        onClick={(e) => { e.stopPropagation(); const n = pick(e); if (n) kc.set({ selected: n.id }); }}
       >
         <octahedronGeometry args={[1, 0]} />
         <meshBasicMaterial toneMapped={false} />
@@ -506,7 +551,7 @@ function Rig({ hull, reduced, idle, hasLayout }: { hull: Hull; reduced: boolean;
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const size = useThree((s) => s.size);
   const controls = useThree((s) => s.controls) as unknown as { target: THREE.Vector3 } | null;
-  const panels = useKeel((s) => !!s.summary);
+  const panels = useKeelcode((s) => !!s.summary);
   const span = Math.max(hull.halfLength, hull.width * 1.6);
 
   // Frame the whole hull inside the open area between the panels.
@@ -559,8 +604,8 @@ function Rig({ hull, reduced, idle, hasLayout }: { hull: Hull; reduced: boolean;
 /* ------------------------------------------------------------------ root */
 
 export default function Graph3D({ onFail }: { onFail: (reason: string) => void }) {
-  const graph = useKeel((s) => s.graph);
-  const busy = useKeel((s) => s.ingesting || Object.values(s.runs).some((r) => r.running));
+  const graph = useKeelcode((s) => s.graph);
+  const busy = useKeelcode((s) => s.ingesting || Object.values(s.runs).some((r) => r.running));
   const layout = useMemo(() => (graph && graph.nodes.length ? computeLayout(graph) : null), [graph]);
   const hull = layout?.hull ?? IDLE_HULL;
   const [reduced, setReduced] = useState(false);
@@ -591,7 +636,7 @@ export default function Graph3D({ onFail }: { onFail: (reason: string) => void }
       camera={{ fov: 42, near: 0.5, far: 4000, position: [120, 60, 120] }}
       onPointerDown={poke}
       onWheel={poke}
-      onPointerMissed={() => keel.set({ selected: null })}
+      onPointerMissed={() => kc.set({ selected: null })}
       onCreated={({ gl, scene }) => {
         scene.background = new THREE.Color("#02070b");
         gl.domElement.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onFail("WebGL context was lost"); }, { once: true });
