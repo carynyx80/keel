@@ -8,7 +8,7 @@ export default function AppleIcon() {
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 40%, #0b2a2a 0%, #02060a 75%)" }}>
-        <OgSymbol size={128} />
+        <OgSymbol size={132} />
       </div>
     ),
     size

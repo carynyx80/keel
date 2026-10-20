@@ -6,6 +6,7 @@ import { Bloom, EffectComposer, Noise, Vignette } from "@react-three/postprocess
 import * as THREE from "three";
 import { kc, pulses, useKeelcode } from "@/lib/client/store";
 import { drones, scope } from "@/lib/client/scope";
+import { MARK, markSegments } from "@/components/brand/marks";
 import { computeLayout, hullDepth, hullFloor, hullWidth, IDLE_HULL, stageFreeWidth, stageOffsetX, type Compartment, type Layout } from "./layout";
 
 type Hull = Layout["hull"];
@@ -89,44 +90,23 @@ function HullFrame({ hull, compartments, busy }: { hull: Hull; compartments: Com
   );
 }
 
-/** The Keelcode mark as glowing line geometry (64×64 SVG grid → world units). */
-function useMarkGeometry(size: number) {
-  return useMemo(() => {
-    const P = (x: number, y: number) => [((x - 32) / 64) * size, (-(y - 32) / 64) * size, 0];
-    const hull = [[23, 11], [8, 27], [32, 51], [56, 27], [41, 11]];
-    const pts: number[] = [];
-    for (let i = 1; i < hull.length; i++) pts.push(...P(hull[i - 1][0], hull[i - 1][1]), ...P(hull[i][0], hull[i][1]));
-    pts.push(...P(32, 51), ...P(32, 61));
-    // ring centred on the origin; placed at the contact position by the caller
-    const ring: number[] = [];
-    const rr = (7 / 64) * size;
-    for (let i = 0; i < 40; i++) {
-      const a0 = (i / 40) * Math.PI * 2, a1 = ((i + 1) / 40) * Math.PI * 2;
-      ring.push(Math.cos(a0) * rr, Math.sin(a0) * rr, 0, Math.cos(a1) * rr, Math.sin(a1) * rr, 0);
-    }
-    const g = (a: number[]) => {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.Float32BufferAttribute(a, 3));
-      return geo;
-    };
-    return { mark: g(pts), ring: g(ring), dot: P(32, 29) as [number, number, number] };
-  }, [size]);
-}
-
 /** Conning tower at the bow: where the crew launches from, flying the Keelcode mark. */
 function Bridge({ hull }: { hull: Hull }) {
   const z = hull.halfLength - 6;
   const beacon = useRef<THREE.Group>(null);
-  const ring = useRef<THREE.LineSegments>(null);
-  const { mark, ring: ringGeo, dot } = useMarkGeometry(9);
+  const ring = useRef<THREE.Mesh>(null);
+  const size = 9; // world units for the 64-unit mark grid
+  const k = size / 64;
+  const segs = useMemo(() => markSegments(), []);
+  const keel = segs[segs.length - 1];
   const mast = useMemo(() => new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 6, 0), new THREE.Vector3(0, 9.5, 0)]), []);
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    if (beacon.current) beacon.current.position.y = 13 + Math.sin(t * 1.2) * 0.5;
+    if (beacon.current) beacon.current.position.y = 14 + Math.sin(t * 1.2) * 0.5;
     if (ring.current) {
-      const k = (t * 0.6) % 1;
-      ring.current.scale.setScalar(1 + k * 1.8);
-      (ring.current.material as THREE.LineBasicMaterial).opacity = (1 - k) * 0.8;
+      const q = (t * 0.55) % 1;
+      ring.current.scale.setScalar(1 + q * 5);
+      (ring.current.material as THREE.MeshBasicMaterial).opacity = (1 - q) * 0.9;
     }
   });
   return (
@@ -138,20 +118,27 @@ function Bridge({ hull }: { hull: Hull }) {
       <lineSegments geometry={mast}>
         <lineBasicMaterial color="#35f2c2" transparent opacity={0.5} />
       </lineSegments>
-      <group ref={beacon} position={[0, 13, 0]}>
+      <group ref={beacon} position={[0, 14, 0]}>
         <Billboard>
-          <lineSegments geometry={mark}>
-            <lineBasicMaterial color={[0.7, 3.2, 2.5]} toneMapped={false} />
-          </lineSegments>
-          <lineSegments geometry={ringGeo} position={dot}>
-            <lineBasicMaterial color={[0.5, 2, 1.6]} toneMapped={false} transparent opacity={0.6} />
-          </lineSegments>
-          <lineSegments ref={ring} geometry={ringGeo} position={dot}>
-            <lineBasicMaterial color={[0.6, 2.4, 2]} toneMapped={false} transparent opacity={0.6} depthWrite={false} />
-          </lineSegments>
-          <mesh position={dot}>
-            <circleGeometry args={[0.42, 20]} />
-            <meshBasicMaterial color={[1, 4, 3.2]} toneMapped={false} />
+          {segs.map(([x1, x2, y, o], i) => {
+            const len = (x2 - x1) * k;
+            const r = (MARK.stroke / 2) * k;
+            const cx = ((x1 + x2) / 2 - 32) * k, cy = -(y - 32) * k;
+            return len < 0.01 ? (
+              <mesh key={i} position={[cx, cy, 0]}>
+                <circleGeometry args={[r, 20]} />
+                <meshBasicMaterial color={[1, 4, 3.2]} toneMapped={false} />
+              </mesh>
+            ) : (
+              <mesh key={i} position={[cx, cy, 0]} rotation={[0, 0, Math.PI / 2]}>
+                <capsuleGeometry args={[r, len, 4, 12]} />
+                <meshBasicMaterial color={new THREE.Color(0.55, 2.6, 2.1).multiplyScalar(0.55 + o * 0.6)} toneMapped={false} />
+              </mesh>
+            );
+          })}
+          <mesh ref={ring} position={[(keel[0] - 32) * k, -(keel[2] - 32) * k, -0.01]}>
+            <ringGeometry args={[(MARK.stroke / 2) * k * 0.9, (MARK.stroke / 2) * k * 1.15, 32]} />
+            <meshBasicMaterial color={[0.6, 2.6, 2.1]} toneMapped={false} transparent depthWrite={false} />
           </mesh>
         </Billboard>
       </group>

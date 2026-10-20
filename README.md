@@ -133,9 +133,10 @@ These are the real limits. Where something can't run inside a Vercel function, K
 | Logo (transparent, for dark surfaces) | `public/brand/keelcode-logo-transparent.svg` |
 | Logo (for light surfaces) | `public/brand/keelcode-logo-light.svg` |
 | Symbol | `public/brand/keelcode-symbol.svg`, `keelcode-symbol-tile.svg`, `keelcode-symbol-mono.svg` |
+| PNG exports | `/brand/keelcode-logo.png` (2400×800), `/brand/keelcode-symbol.png` (1024×1024) |
 | Favicon / Apple icon / social card | `app/icon.svg`, `app/apple-icon.tsx`, `app/opengraph-image.tsx` |
 
-The symbol is a pair of code brackets `‹ ›` whose lower arms close into a V-hull, with a keel fin beneath and a sonar contact at the centre: code and vessel in one shape. The wordmark is drawn as chamfered paths, so it needs no font. Both come from one source, `components/brand/Logo.tsx`; regenerate the static files with `npx tsx scripts/brand.tsx`.
+The symbol is a hull made of code: rounded "lines of code" whose lengths trace a half-moon hull, finishing in a single keel point. The wordmark is a rounded geometric lowercase "keelcode" (keel in ink, code in sonar teal), drawn as paths so it needs no font. All renderings come from one source, `components/brand/marks.ts`; regenerate the static files with `npx tsx scripts/brand.tsx`.
 
 ## Project layout
 
